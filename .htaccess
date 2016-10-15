@@ -1,0 +1,63 @@
+RewriteEngine On
+RewriteBase /tournament-api/
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+#
+# LEVEL FOUR
+#
+
+# SITE/user/[id]/tournament/[id]
+#RewriteRule ^user\/([0-9]*)\/tournament\/([0-9]*)(\/?)$ src/view/user.php?user_id=$1&tournament_id=$2 [NC,L]
+
+#
+# LEVEL THREE
+#
+
+# SITE/user/id/[id]
+RewriteRule ^u\/id\/([0-9]+)(\/?)$ src/view/user.php?type=user&id=$1 [NC,L]
+
+# SITE/user/tournament/[name]
+#RewriteRule ^user\/tournament\/([A-Za-z0-9]+)(\/?)$ src/view/user.php?tournament_name=$1 [NC,L]
+
+#
+# LEVEL TWO
+#
+
+# SITE/user/[id]
+RewriteRule ^user\/([0-9]+)(\/?)$ src/view/user.php?user_id=$1 [NC,L]
+# SITE/user/[name]
+RewriteRule ^user\/([A-Za-z0-9]+)(\/?)$ src/view/user.php?user_name=$1 [NC,L]
+
+# SITE/store/[id]
+RewriteRule ^store\/([0-9]+)(\/?)$ src/view/store.php?store_id=$1 [NC,L]
+# SITE/user/[name]
+RewriteRule ^store\/([A-Za-z0-9]+)(\/?)$ src/view/store.php?vanity_url=$1 [NC,L]
+#   ^               START
+#   user\/          Must be in this category and have a /.
+#   ([^\/\n\r]+)    AT LEAST 1: Not / or whitespace.
+#   ([A-Za-z0-9]+)  AT LEAST 1: Alphanumeric.
+#   ([0-9]+)        AT LEAST !: Numeric.
+#   (\/?)           Optional /
+#   $               END
+
+# SITE/tournament/[id]
+RewriteRule ^tournament\/([0-9]+)(\/?)$ src/view/tournament.php?tournament_id=$1 [NC,L]
+# SITE/tournament/[name]
+RewriteRule ^tournament\/([A-Za-z0-9]+)(\/?)$ src/view/tournament.php?tournament_name=$1 [NC,L]
+
+#
+# LEVEL ONE
+#
+
+# SITE/???/
+RewriteRule ^login(\/?)$ src/view/login.php [NC,L]
+RewriteRule ^logout(\/?)$ src/view/logout.php [NC,L]
+RewriteRule ^register(\/?)$ src/view/register.php [NC,L]
+RewriteRule ^upload(\/?)$ scripts/upload.php [NC,L]
+RewriteRule ^settings(\/?)$ src/view/settings.php [NC,L]
+RewriteRule ^t(\/?)$ src/view/tournament.php [NC,L]
+RewriteRule ^u(\/?)$ src/view/user.php?type=user [NC,L]
+RewriteRule ^store(\/?)$ src/view/store.php [NC,L]
+RewriteRule ^([A-Za-z0-9]+)(\/?)$ src/view/user.php?type=$1 [NC,L]
