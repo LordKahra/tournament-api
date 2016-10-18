@@ -5,7 +5,12 @@
 require_once SITE_ROOT . '/src/file/WERParser.php';
 
 use kahra\src\database\Tournament;
+use kahra\src\database\Upload;
+use kahra\src\exception\UploadFailureException;
 use kahra\src\file\WERParser;
+use kahra\src\util\Email;
+use kahra\src\util\Debug;
+
 const SIZE_LIMIT = 8388608; // 8MB
 
 const UPLOAD_TOURNAMENT = "tournament";
@@ -26,17 +31,18 @@ function uploadTournament($fileData, $fileExtension, $tournamentId=false) {
     if ($error = isMissingUploadDirectory($fileDir)) return $error;
 
     // Name according to tournament id, or for anonymous users, timestamp.
-    $fileId = getTournamentId($isLoggedIn, $tournamentId);
 
-    if (!$fileId) {
-        $error = "There was a server error creating the tournament. If the issue persists, please contact support.";
-        return $error;
+    $tournamentId = getTournamentId($isLoggedIn, $tournamentId);
+    $uploadId = getUploadId($tournamentId);
+
+    if (!$tournamentId || !$uploadId) {
+        throw new UploadFailureException("Error encountered while saving the tournament file.");
     }
 
-    $fileName = $fileId . "." . $fileExtension;
+    $fileName = $uploadId . "." . $fileExtension;
 
     // Upload the file.
-    $result = uploadFile($fileData, $fileDir, $fileName, $fileId);
+    $result = uploadFile($fileData, $fileDir, $fileName, $uploadId);
 
     // Recheck all tournaments.
     WERParser::updateTournaments();
@@ -45,21 +51,23 @@ function uploadTournament($fileData, $fileExtension, $tournamentId=false) {
     return $result;
 }
 
-function getTournamentId($isLoggedIn, $tournamentId=false) {
-    $fileID = "";
+function getUploadId($tournament_id) {
+    // Get the current time.
 
+    // Insert the upload into the database.
+    $uploadId = Upload::insert(array(
+        "tournament_id" => $tournament_id,
+        "timestamp" => time()
+    ));
+
+    return $uploadId;
+}
+
+function getTournamentId($isLoggedIn, $tournamentId=false) {
     // If there's no tournamentId, create a new tournament.
     $id = $tournamentId ? $tournamentId : Tournament::insert(array("name" => "New Tournament"));
-    // TODO: Throw here if error.
 
-    if ($isLoggedIn) {
-        $fileID = $id;
-    } else {
-        // TODO: Better validation against same-time uploaders.
-        $fileID = $id;
-    }
-
-    return $fileID;
+    return $id;
 }
 
 function hasUploadError($fileData, $fileExtension, $type) {

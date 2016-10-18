@@ -20,6 +20,6 @@ class Bye extends Object {
     }
     
     static function getByPlayerId($id) {
-        return static::getByField("player_id" $id);
+        return static::getByField("player_id", $id);
     }
 }

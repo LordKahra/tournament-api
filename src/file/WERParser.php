@@ -10,10 +10,15 @@ require_once (SITE_ROOT . "/src/model/Tournament.php");
 require_once (SITE_ROOT . "/src/util/util.php");
 require_once (SITE_ROOT . "/src/util/email.php");*/
 
-use kahra\src\model\Object;
-use kahra\src\model\Player;
-use kahra\src\model\Pairing;
-use kahra\src\model\Tournament;
+use kahra\src\database\Object;
+use kahra\src\database\Player;
+use kahra\src\database\Pairing;
+use kahra\src\database\Tournament;
+use kahra\src\database\Round;
+use kahra\src\database\Bye;
+use kahra\src\database\Match;
+use kahra\src\database\Seat;
+use kahra\src\exception\InsertFailureException;
 use kahra\src\util\Debug;
 use kahra\src\util\Email;
 
@@ -78,35 +83,35 @@ class WERParser {
      */
 
     public static function updateTournaments($where=false, $forceUpdate=false) {
-        Debug::log(self::TAG, "Entered.");
+        Debug::log(static::TAG, "Entered.");
         $tournaments = new Tournament();
         $records = Tournament::get($where);
 
         // If results were found, iterate through and update.
         if ($records) {
             while ($record = mysqli_fetch_assoc($records)) {
-                Debug::log(self::TAG, "Parsing record " . $record["tournament_id"] . ".\");</script>");
-                $fileName = SITE_ROOT . "/" . self::UPLOAD_DIRECTORY . "/" . $record["tournament_id"] . ".wer";
-                Debug::log(self::TAG, getcwd());
+                Debug::log(static::TAG, "Parsing record " . $record["tournament_id"] . ".\");</script>");
+                $fileName = SITE_ROOT . "/" . static::UPLOAD_DIRECTORY . "/" . $record["tournament_id"] . ".wer";
+                Debug::log(static::TAG, getcwd());
                 if (file_exists($fileName)) {
                     $testDate = filemtime($fileName);
                     $updated = intval($record["tournament_last_updated"]);
-                    Debug::log(self::TAG, "testDate: " . $testDate . " updated: " . $updated);
+                    Debug::log(static::TAG, "testDate: " . $testDate . " updated: " . $updated);
                     if ($updated != $testDate OR $forceUpdate) {
-                        Debug::log(self::TAG, "WERParser.updateTournaments(): Updating tournament.");
-                        self::updateTournament($record);
+                        Debug::log(static::TAG, "WERParser.updateTournaments(): Updating tournament.");
+                        static::updateTournament($record);
                     } else {
-                        Debug::log(self::TAG, "WERParser.updateTournaments(): No need to update. last update: " . $updated);
+                        Debug::log(static::TAG, "WERParser.updateTournaments(): No need to update. last update: " . $updated);
                     }
-                    Debug::log(self::TAG, "WERParser.updateTournaments(): Done parsing.");
+                    Debug::log(static::TAG, "WERParser.updateTournaments(): Done parsing.");
                 } else {
                     // TODO: Better support for issues with missing files.
-                    Debug::log(self::TAG, "File missing for tournament " . $record["tournament_id"] . ".");
-                    Debug::log(self::TAG, "File: " . $fileName);
+                    Debug::log(static::TAG, "File missing for tournament " . $record["tournament_id"] . ".");
+                    Debug::log(static::TAG, "File: " . $fileName);
                 }
             }
         } else {
-            Debug::log(self::TAG, "No records found.");
+            Debug::log(static::TAG, "No records found.");
         }
     }
 
@@ -115,16 +120,16 @@ class WERParser {
         $pairings = new Pairing();
 
         // Delete the old pairings.
-        Debug::log(self::TAG, "WERParser.updateTournament(): Deleting records from tournament " . $record['tournament_id'] . ".");
+        Debug::log(static::TAG, "WERParser.updateTournament(): Deleting records from tournament " . $record['tournament_id'] . ".");
         //echo "<script>console.log(\"WERParser.updateTournament(): Deleting records from tournament " . $record['tournament_id'] . ".\");</script>";
         Pairing::delete("tournament_id = " . $record["tournament_id"]);
 
         $where = "id = " . $record["tournament_id"];
-        $filename = SITE_ROOT . "/" . self::UPLOAD_DIRECTORY . "/" . $record["tournament_id"] . ".wer";
-        //$filename = self::UPLOAD_DIRECTORY . "/" . $record["tournament_id"] . ".wer";
+        $filename = SITE_ROOT . "/" . static::UPLOAD_DIRECTORY . "/" . $record["tournament_id"] . ".wer";
+        //$filename = static::UPLOAD_DIRECTORY . "/" . $record["tournament_id"] . ".wer";
 
         $body = file_get_contents($filename);
-        self::handleWERText($body, $record["tournament_id"]);
+        static::handleWERText($body, $record["tournament_id"]);
         // Update with the new file date.
         $fields = array(
             "last_updated" => filemtime($filename)
@@ -132,11 +137,11 @@ class WERParser {
         Tournament::update($fields, $where);
 
         // Notify the players.
-        self::notifyPlayers($record["tournament_id"]);
+        static::notifyPlayers($record["tournament_id"]);
     }
 
     public static function notifyPlayers($tournamentID) {
-        Debug::log(self::TAG, "notifyPlayers(): Entered.");
+        Debug::log(static::TAG, "notifyPlayers(): Entered.");
         // Get the pairing data.
         $pairings = new Pairing();
         $records = $pairings->getByTournament($tournamentID);
@@ -164,7 +169,7 @@ class WERParser {
 
             // Determine if this player needs to be notified.
             if (!empty($record["user_email"])) {
-                Debug::log(self::TAG, "player needs to be notified at " . $record["user_email"]);
+                Debug::log(static::TAG, "player needs to be notified at " . $record["user_email"]);
 
                 $player["email"] = $record["user_email"];
 
@@ -196,12 +201,12 @@ class WERParser {
     }
 
     public static function handleWERText($body, $tournamentID) {
-        Debug::log(self::TAG, "handleWERText(): Entered.");
+        Debug::log(static::TAG, "handleWERText(): Entered.");
         // Create database access variables.
         $pairings = new Pairing();
 
         // Update the player data.
-        self::updatePlayerData($body);
+        static::updatePlayerData($body);
 
         $dom = new \DOMDocument();
         $dom->loadXML($body);
@@ -214,7 +219,7 @@ class WERParser {
         $seats          = $dom->getElementsByTagName(WERParser::TAG_SEATS);
         $seats          = $seats->item(0);
 
-        Debug::log(self::TAG, "handleWERText(): Elements created.");
+        Debug::log(static::TAG, "handleWERText(): Elements created.");
 
         // HANDLING PARTICIPATION
         // FUCK IT WE HAVE A FUNCTION FOR THAT
@@ -226,12 +231,114 @@ class WERParser {
         $roundArray = array();
         $assortedMatches = array();
 
-        Debug::log(self::TAG, "handleWERText(): Iterating through rounds.");
+        Debug::log(static::TAG, "handleWERText(): Iterating through rounds.");
 
-        foreach($rounds as $round) {
+        $roundInsertData = array();
+
+        foreach ($rounds as $round) {
+            // Generate insert data.
+            $roundInsertData[] = array(
+                "tournament_id" => $tournamentID,
+                "index" => $round->getAttribute(WERParser::ATTRIBUTE_ROUND_NUMBER)
+            );
+        }
+
+        // Insert and fetch the rounds.
+        Round::bulkInsert($roundInsertData);
+        $roundResult = Round::getByTournamentId($tournamentID);
+
+        // Iterate through the round data, generating match and bye data.
+        $matchInsertData = array();
+        $seatInsertData = array();
+        $byeInsertData = array();
+        $roundIds = array();
+        $roundMap = array();
+
+        foreach ($rounds as $round) {
+            // Get the ID.
+            $roundId = false;
+            foreach ($roundResult as $result) {
+                if ($result["round_index"] == $round->getAttribute(WERParser::ATTRIBUTE_ROUND_NUMBER)) {
+                    $roundId = $result["round_id"];
+                    break;
+                }
+            }
+            if (!$roundId) throw new InsertFailureException("Failed to insert the round.");
+
+            $roundMap[$roundId] = $round;
+            $roundIds[] = $roundId;
+
+            $currentTable = 0;
+            foreach ($round->getElementsByTagName(WERParser::TAG_MATCH) as $match) {
+                $bye = !($match->hasAttribute(WERParser::ATTRIBUTE_MATCH_OPPONENT));
+                $person = $match->getAttribute(WERParser::ATTRIBUTE_MATCH_PERSON);
+
+                if ($bye) {
+                    $byeInsertData[] = array(
+                        "round_id" => $roundId,
+                        "player_id" => $person
+                    );
+                } else {
+                    $currentTable++;
+                    $gameWins   = max(0, $match->getAttribute(WERParser::ATTRIBUTE_MATCH_WINS));
+                    $gameLosses = max(0, $match->getAttribute(WERParser::ATTRIBUTE_MATCH_LOSSES));
+                    $gameDraws  = max(0, $match->getAttribute(WERParser::ATTRIBUTE_MATCH_DRAWS));
+                    $person2 = $match->getAttribute(WERParser::ATTRIBUTE_MATCH_OPPONENT);
+
+                    $matchInsertData[] = array(
+                        "round_id" => $roundId,
+                        "table" => $currentTable,
+                        "draws" => $gameDraws
+                    );
+                    $seatInsertData[$currentTable] = array(
+                        array(
+                            "player_id" => $person,
+                            "wins" => $gameWins
+                        ),
+                        array (
+                            "player_id" => $person2,
+                            "wins" => $gameLosses
+                        )
+                    );
+                }
+            }
+        }
+
+        // Insert the matches and byes.
+        Match::bulkInsert($matchInsertData);
+        Bye::bulkInsert($byeInsertData);
+
+        // Fetch the matches.
+        $matchResult = Match::getByFields("round_id", $roundIds);
+
+        // Map the matches.
+        $matchTableToIdMap = array();
+        foreach ($matchResult as $matchRecord) {
+            $matchTableToIdMap[$matchRecord["match_table"]] = $matchRecord["match_id"];
+        }
+
+        // Update seat insert data.
+        $finalSeatInsertData = array();
+        foreach ($seatInsertData as $table => $seats) {
+            foreach ($seats as $seat) {
+                $seat["match_id"] = $matchTableToIdMap[$table];
+                $finalSeatInsertData[] = $seat;
+            }
+        }
+
+        // Insert the seats.
+        Seat::bulkInsert($finalSeatInsertData);
+
+        /*foreach($rounds as $round) {
             $currentRound = $round->getAttribute(WERParser::ATTRIBUTE_ROUND_NUMBER);
 
+            // Insert the round.
+
+
+
             $matchArray = array();
+            $seatArray = array();
+            $byeArray = array();
 
             foreach ($round->getElementsByTagName(WERParser::TAG_MATCH) as $match) {
                 $bye = !($match->hasAttribute(WERParser::ATTRIBUTE_MATCH_OPPONENT));
@@ -251,14 +358,29 @@ class WERParser {
                 $matchLoss = !$matchWin && !$matchDraw;
 
                 $person = $match->getAttribute(WERParser::ATTRIBUTE_MATCH_PERSON);
+
+                $matchObject = array(
+                    "match" => array(
+                        "tournament_id" => $tournamentID,
+                        "table" => ($bye ? 0 : $currentMatch),
+                    )
+                );
+
                 $matchObject = array(
                     "tournament_id" => $tournamentID,
                     "round" => $currentRound,
                     "table_id" => ($bye ? 0 : $currentMatch),
-                    "player_id" => $person,
+                    //"player_id" => $person,
                     "is_bye" => $bye ? 1 : 0,
                     "points" => (!$matchDone ? 0 : ($matchWin ? 3 : ($matchDraw ? 1 : 0)))
                 );
+
+                $seatObject = array(
+                    "match_id" => ,
+                    "player_id" => $person
+                );
+
+
                 $matchArray[] = $matchObject;
                 $assortedMatches[] = $matchObject;
 
@@ -271,11 +393,11 @@ class WERParser {
             }
             $currentMatch = 0;
             $roundArray[$currentRound] = $matchArray;
-        }
+        }*/
 
-        Debug::log(self::TAG, "handleWERText(): Done iterating through rounds. Upserting new pairings.");
+        Debug::log(static::TAG, "handleWERText(): Done iterating through rounds. Objects inserted successfully.");
 
-        Pairing::upsert($assortedMatches);
+        //Pairing::upsert($assortedMatches);
 
         // Done! Return the pairing information.
         return $roundArray;

@@ -32,13 +32,18 @@ require_once SITE_ROOT . "/src/util/email.php";
 require_once SITE_ROOT . "/src/util/str.php";
 
 // MODEL REQUIREMENTS
+require_once SITE_ROOT . "/src/exception/Exception.php";
 require_once SITE_ROOT . "/src/database/Object.php";
 require_once SITE_ROOT . "/src/database/Player.php";
 require_once SITE_ROOT . "/src/database/Tournament.php";
 require_once SITE_ROOT . "/src/database/Round.php";
+require_once SITE_ROOT . "/src/database/Match.php";
+require_once SITE_ROOT . "/src/database/Bye.php";
+require_once SITE_ROOT . "/src/database/Seat.php";
 require_once SITE_ROOT . "/src/database/Pairing.php";
 require_once SITE_ROOT . "/src/database/User.php";
 require_once SITE_ROOT . "/src/database/Store.php";
+require_once SITE_ROOT . "/src/database/Upload.php";
 
 // VIEW REQUIREMENTS
 require_once SITE_ROOT . "/src/view/View.php";

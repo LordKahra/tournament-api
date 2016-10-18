@@ -10,8 +10,8 @@ class Match extends Object {
     const TABLE_NAME        = "matches";
     const NAME_SINGULAR     = "match";
     const ALIAS             = "match";
-    const FIELDS_SELECT     = "id,round_id,table";
-    const FIELDS_INSERT     = "round_id,table";
+    const FIELDS_SELECT     = "id,round_id,table,draws";
+    const FIELDS_INSERT     = "round_id,table,draws";
 
     // CUSTOM QUERIES ////
 
@@ -20,6 +20,6 @@ class Match extends Object {
     }
     
     static function getByTable($table) {
-        return static::getByField("table" $id);
+        return static::getByField("table", $table);
     }
 }

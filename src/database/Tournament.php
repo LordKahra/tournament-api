@@ -29,12 +29,14 @@ class Tournament extends Object {
         $user_fields = array("id");
         $aliased_fields = implode(",", Str::getReferences($user_alias, $user_fields));
 
-        /*$store_table = Store::getTableName();
+        /*
+        $store_table = Store::getTableName();
         $store_alias = Store::getAlias();
         $store_fields = array("id", "name");
         $aliased_store_fields = implode(", " . $store_alias . ".", $store_fields);
         $aliased_store_fields = empty($aliased_store_fields) ? "" : $store_alias . "." . $aliased_store_fields;
-*/
+        */
+
         return array(
             "user" => array(
                 "fields" => $user_fields,

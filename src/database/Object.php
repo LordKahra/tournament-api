@@ -3,6 +3,7 @@
 namespace kahra\src\database;
 
 use DOMDocument;
+use kahra\src\exception\SQLInsertException;
 use kahra\src\util\Debug;
 
 abstract class Object {
@@ -58,7 +59,7 @@ abstract class Object {
 
         // Add object fields.
         foreach(static::getQueryFields() as $field) {
-            $clause .= (empty($clause) ? "" : ",") . "\n" . static::getAlias() . "." . $field . " AS " . static::getSingularName() . "_" . $field;
+            $clause .= (empty($clause) ? "" : ",") . "\n`" . static::getAlias() . "`." . $field . " AS " . static::getSingularName() . "_" . $field;
         }
 
         // If any, add child fields.
@@ -182,7 +183,7 @@ abstract class Object {
     ////////////////////////////////
 
     // innerJoin: `TARGET` on SOURCE.FIELD = TARGET.FIELD;
-    static function get($where=false, $joins=array(), $order=false, $includeChildren=true) {
+    static function get($where=false, $joins=array(), $order=false, $includeChildren=false) {
         //$children = $includeChildren ? static::getChildren() : array();
 
         // Create variables.
@@ -209,7 +210,7 @@ abstract class Object {
             "SELECT " .
                 $select .
                 ($subselect ? ", " . $subselect : "") . " " .
-            "\r\nFROM " . static::getTableName() . " " . static::getAlias() .
+            "\r\nFROM " . static::getTableName() . " `" . static::getAlias() . "`" .
             ($monojoins ? " \r\n" . $monojoins : "") .
             $join .
             ($where     ? " \r\nWHERE "         . $where                : "") .
@@ -227,7 +228,11 @@ abstract class Object {
                 // TODO:
                 $objects[] = $object;
             }*/
-            return $objects;
+            $mappedObjects = array();
+            foreach ($objects as $object) {
+                $mappedObjects[$object[static::getSingularName() . "_" . static::FIELD_ID]] = $object;
+            }
+            return $mappedObjects;
         }
         return false;
         //return $results;
@@ -279,6 +284,7 @@ abstract class Object {
         //var_dump($fields);
         //var_dump($results);
         //print_r($mysqli);
+        if (!$results) throw new SQLInsertException("Failed to insert " . static::ALIAS . " with error: " . $mysqli->error);
         return $mysqli->insert_id;
         // TODO: FULL SWAP OVER TO STATUS => true/false
     }

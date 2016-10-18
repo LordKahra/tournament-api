@@ -5,6 +5,10 @@ require_once str_replace("//", "/", $_SERVER['DOCUMENT_ROOT'] . (((strpos($_SERV
 use kahra\src\database\Object;
 use kahra\src\database\Pairing;
 use kahra\src\database\Tournament;
+use kahra\src\database\Round;
+use kahra\src\database\Bye;
+use kahra\src\database\Match;
+use kahra\src\database\Seat;
 
 use kahra\src\view\View;
 
@@ -27,26 +31,53 @@ function getTournaments() {
     return $tournaments;
 }
 
-function show() {
-    $tournaments = getTournaments();
-    $errors = [];
-    $title = false;
-    $og_url = false;
-
+function show($tournaments=false) {
     if ($tournaments) {
-        //var_dump($tournaments);
-        //$tournament_arrays = Tournament::parseRecords($tournaments);
-        //$tournament_arrays = $tournaments;
+        $tournament_ids = array();
 
         foreach ($tournaments as $tournament) {
-            $pairing_result = Pairing::getByTournament($tournament["tournament_id"]);
-            $pairings = $pairing_result;
-            var_dump($pairings);
-            /*foreach ($pairings as $pairing) {
-                if (!$pairings) $pairings = array();
-                $pairings[] = $pairing;
-            }*/
-            $tournament["pairings"] = $pairings ? Pairing::getMatches($pairings) : array();
+            $tournament_ids[] = $tournament["tournament_id"];
+            $tournament["rounds"] = array();
+        }
+
+        $rounds = Round::getByFields("tournament_id", $tournament_ids);
+
+        if ($rounds) {
+            $round_ids = array();
+
+            foreach ($rounds as $round) {
+                $round_ids[] = $round["round_id"];
+                $round["matches"] = array();
+                $round["byes"] = array();
+            }
+
+            $matches = Match::getByFields("round_id", $round_ids);
+            $byes = Bye::getByFields("round_id", $round_ids);
+
+            if ($matches) {
+                $match_ids = array();
+
+                foreach ($matches as $match) {
+                    $match_ids[] = $match["match_id"];
+                    $match["seats"] = array();
+                }
+
+                $seats = Seat::getByFields("match_id", $match_ids);
+
+                if ($seats) {
+                    foreach($seats as $seat) {
+                        $matches[$seat["seat_match_id"]]["seats"][] = $seat;
+                    }
+                }
+
+                foreach($matches as $match) {
+                    $rounds[$match["match_round_id"]]["matches"][] = $match;
+                }
+            }
+
+            foreach($rounds as $round) {
+                $tournaments[$round["round_tournament_id"]]["rounds"][] = $round;
+            }
         }
 
         echo "<pre>" . View::formatSuccessResponse("Fetched tournaments.", $tournaments) . "</pre>";
@@ -122,7 +153,7 @@ if ($tournaments) {
     ?>No tournaments found.<?php
 }*/
 
-show();
+show(getTournaments());
 
 //print_r($_GET);
 

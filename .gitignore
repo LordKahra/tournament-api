@@ -24,3 +24,8 @@ build/
 # .gradle               - Pushable since 0.3 - Use default gradle wrapper and auto import.
 .gradle/
 #*.iml                  - Pushable since 0.3.
+.idea/
+log/
+res/
+
+# Project Files
