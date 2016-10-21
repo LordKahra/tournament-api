@@ -19,7 +19,8 @@ define("SITE_HOST", getenv("SITE_HOST_API_TOURNAMENT"));
 define("DATABASE_HOST", getenv("DATABASE_HOST"));
 define("DATABASE_USERNAME", getenv("DATABASE_USERNAME"));
 define("DATABASE_PASSWORD", getenv("DATABASE_PASSWORD"));
-define("DATABASE_NAME", "pairings");
+define("DATABASE_NAME", getenv("DATABASE_NAME_API_TOURNAMENT"));
+//define("DATABASE_NAME", "pairings");
 // TODO: Better security.
 
 // EMAIL
