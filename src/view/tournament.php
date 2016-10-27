@@ -14,6 +14,10 @@ use kahra\src\view\View;
 
 // API OPTIONS
 
+function getPrefix() {
+    return (View::IS_ALIASED ? "tournament_" : "");
+}
+
 function getTournaments() {
     $tournaments = false;
 
@@ -36,7 +40,7 @@ function show($tournaments=false) {
         $tournament_ids = array();
 
         foreach ($tournaments as $tournament) {
-            $tournament_ids[] = $tournament["tournament_id"];
+            $tournament_ids[] = $tournament[getPrefix() . "id"];
             $tournament["rounds"] = array();
         }
 
@@ -46,7 +50,7 @@ function show($tournaments=false) {
             $round_ids = array();
 
             foreach ($rounds as $round) {
-                $round_ids[] = $round["round_id"];
+                $round_ids[] = $round[getPrefix() . "id"];
                 $round["matches"] = array();
                 $round["byes"] = array();
             }
@@ -58,7 +62,7 @@ function show($tournaments=false) {
                 $match_ids = array();
 
                 foreach ($matches as $match) {
-                    $match_ids[] = $match["match_id"];
+                    $match_ids[] = $match[getPrefix() . "id"];
                     $match["seats"] = array();
                 }
 
@@ -66,17 +70,17 @@ function show($tournaments=false) {
 
                 if ($seats) {
                     foreach($seats as $seat) {
-                        $matches[$seat["seat_match_id"]]["seats"][] = $seat;
+                        $matches[$seat[getPrefix() . "match_id"]]["seats"][] = $seat;
                     }
                 }
 
                 foreach($matches as $match) {
-                    $rounds[$match["match_round_id"]]["matches"][] = $match;
+                    $rounds[$match[getPrefix() . "round_id"]]["matches"][] = $match;
                 }
             }
 
             foreach($rounds as $round) {
-                $tournaments[$round["round_tournament_id"]]["rounds"][] = $round;
+                $tournaments[$round[getPrefix() . "tournament_id"]]["rounds"][] = $round;
             }
         }
 

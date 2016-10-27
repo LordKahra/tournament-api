@@ -6,13 +6,14 @@ abstract class View implements ViewStaticFunctions {
     const STATUS_SUCCESS = 1;
     const STATUS_FAILURE = 0;
     const CODE_SUCCESS = 200;
+    const IS_ALIASED = false;
 
     static function parseResult($result) {
         if ($result) {
             $objects = array();
 
             //while ($tournament = mysqli_fetch_assoc($result)) {
-            while ($tournament = mysqli_fetch_all($result, MYSQLI_ASSOC)) {
+            foreach ($result as $tournament) {
                 //if (!$objects) $objects = array();
                 $objects[] = $tournament;
                 $title = $tournament["tournament_name"];

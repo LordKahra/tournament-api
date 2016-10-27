@@ -230,7 +230,15 @@ abstract class Object {
             }*/
             $mappedObjects = array();
             foreach ($objects as $object) {
-                $mappedObjects[$object[static::getSingularName() . "_" . static::FIELD_ID]] = $object;
+
+                $cleanObject = array();
+                foreach ($object as $key => $value) {
+                    // This is where the name can be stripped out.
+                    $cleanKey = str_replace(static::getSingularName() . "_", "", $key);
+                    $cleanObject[$cleanKey] = $value;
+                }
+                //$mappedObjects[$object[static::getSingularName() . "_" . static::FIELD_ID]] = $object;
+                $mappedObjects[$cleanObject[static::FIELD_ID]] = $cleanObject;
             }
             return $mappedObjects;
         }
