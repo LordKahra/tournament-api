@@ -30,6 +30,7 @@ require_once SITE_ROOT . "/src/util/util.php";
 require_once SITE_ROOT . "/src/util/upload.php";
 require_once SITE_ROOT . "/src/util/email.php";
 require_once SITE_ROOT . "/src/util/str.php";
+require_once SITE_ROOT . "/src/util/validation.php";
 
 // MODEL REQUIREMENTS
 require_once SITE_ROOT . "/src/exception/Exception.php";

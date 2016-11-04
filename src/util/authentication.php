@@ -4,6 +4,10 @@ function isLoggedIn() {
     return isset($_SESSION["id"]) && !empty($_SESSION["id"]);
 }
 
+function getLoggedInUserId() {
+    return (isset($_SESSION["id"]) && !empty($_SESSION["id"])) ? $_SESSION["id"] : false;
+}
+
 function isMagicPlayer($dci) {
     return !empty($dci) && isset($_SESSION["dci"]) && $_SESSION["dci"] == $dci;
 }

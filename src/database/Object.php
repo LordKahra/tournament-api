@@ -17,6 +17,11 @@ abstract class Object {
     const FIELDS_INSERT     = false;
     const FIELDS_UPSERT     = false;
     const DEFAULT_SORT      = false;
+    const IS_PREFIXED       = false;
+
+    static function getPrefix() {
+        return (static::IS_PREFIXED ? static::ALIAS . "_" : "");
+    }
 
     static function getIDField() {
         return static::FIELD_ID;
@@ -339,7 +344,7 @@ abstract class Object {
         global $mysqli;
         $results = $mysqli->query($query);
         //return $results;
-        return $mysqli->insert_id;
+        return $mysqli->affected_rows;
     }
 
     ////////////////////////////////

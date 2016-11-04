@@ -9,8 +9,8 @@ class Store extends Object {
     const TABLE_NAME        = "stores";
     const NAME_SINGULAR     = "store";
     const ALIAS             = "store";
-    const FIELDS_SELECT     = "id,user_id,name,vanity_url,site";
-    const FIELDS_INSERT     = "user_id,name";
+    const FIELDS_SELECT     = "id,user_id,name,vanity_url,site,address_1,address_2,city,state,zip,country";
+    const FIELDS_INSERT     = "user_id,name,country";
 
     /*static function getChildren() {
         return [ static::getGenericChildJoinClause(Tournament::getTableName(), Tournament::getAlias(), Tournament::getParentIDField()) => new Tournament() ];
@@ -40,13 +40,15 @@ class Store extends Object {
         return self::getByField("user_id", $user_id);
     }
 
-    static function create($user_id, $name, $vanity_url=false, $site=false) {
+    static function create($user_id, $name, $vanity_url=false, $site=false, $country="US") {
+        // TODO: validation.
         $object = array(
             "user_id" => $user_id,
-            "name" => $name
+            "name" => $name,
+            "country" => $country
         );
         if ($vanity_url) $object["vanity_url"] = $vanity_url;
-        if ($vanity_url) $object["site"] = $site;
+        if ($site) $object["site"] = $site;
 
         return self::insert($object);
     }

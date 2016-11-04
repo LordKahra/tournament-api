@@ -10,3 +10,5 @@ class SQLUpdateException extends SQLException {}
 
 class InsertFailureException extends Exception {}
 class UploadFailureException extends Exception {}
+
+class InvalidInputException extends Exception {}

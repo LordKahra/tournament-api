@@ -1,6 +1,7 @@
 <?php
 
-require_once str_replace("//", "/", $_SERVER['DOCUMENT_ROOT'] . (((strpos($_SERVER['DOCUMENT_ROOT'], 'wamp') === false)) ? '' : '/tournament-api') . '/src/config/app_config.php');
+//require_once str_replace("//", "/", $_SERVER['DOCUMENT_ROOT'] . (((strpos($_SERVER['DOCUMENT_ROOT'], 'wamp') === false)) ? '' : '/tournament-api') . '/src/config/app_config.php');
+require_once (getenv("SITE_ROOT_API_TOURNAMENT") . '\src\config\app_config.php');
 
 use kahra\src\database\Object;
 use kahra\src\database\Pairing;
@@ -11,12 +12,13 @@ use kahra\src\database\Match;
 use kahra\src\database\Seat;
 
 use kahra\src\view\View;
+use kahra\src\view\APIResponse;
 
 // API OPTIONS
 
-function getPrefix() {
+/*function getPrefix() {
     return (View::IS_ALIASED ? "tournament_" : "");
-}
+}*/
 
 function getTournaments() {
     $tournaments = false;
@@ -40,7 +42,7 @@ function show($tournaments=false) {
         $tournament_ids = array();
 
         foreach ($tournaments as $tournament) {
-            $tournament_ids[] = $tournament[getPrefix() . "id"];
+            $tournament_ids[] = $tournament[Object::getPrefix() . "id"];
             $tournament["rounds"] = array();
         }
 
@@ -50,7 +52,7 @@ function show($tournaments=false) {
             $round_ids = array();
 
             foreach ($rounds as $round) {
-                $round_ids[] = $round[getPrefix() . "id"];
+                $round_ids[] = $round[Object::getPrefix() . "id"];
                 $round["matches"] = array();
                 $round["byes"] = array();
             }
@@ -62,7 +64,7 @@ function show($tournaments=false) {
                 $match_ids = array();
 
                 foreach ($matches as $match) {
-                    $match_ids[] = $match[getPrefix() . "id"];
+                    $match_ids[] = $match[Object::getPrefix() . "id"];
                     $match["seats"] = array();
                 }
 
@@ -70,17 +72,17 @@ function show($tournaments=false) {
 
                 if ($seats) {
                     foreach($seats as $seat) {
-                        $matches[$seat[getPrefix() . "match_id"]]["seats"][] = $seat;
+                        $matches[$seat[Object::getPrefix() . "match_id"]]["seats"][] = $seat;
                     }
                 }
 
                 foreach($matches as $match) {
-                    $rounds[$match[getPrefix() . "round_id"]]["matches"][] = $match;
+                    $rounds[$match[Object::getPrefix() . "round_id"]]["matches"][] = $match;
                 }
             }
 
             foreach($rounds as $round) {
-                $tournaments[$round[getPrefix() . "tournament_id"]]["rounds"][] = $round;
+                $tournaments[$round[Object::getPrefix() . "tournament_id"]]["rounds"][] = $round;
             }
         }
 

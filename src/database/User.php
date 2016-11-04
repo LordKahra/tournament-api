@@ -2,6 +2,8 @@
 
 namespace kahra\src\database;
 
+use kahra\src\exception\InvalidInputException;
+use kahra\src\util\Validation;
 use kahra\src\database\Object;
 
 class User extends Object {
@@ -53,12 +55,13 @@ class User extends Object {
     // Returns status.
     static function login($email, $password) {
         $result = static::getByField("email", $email);
+        $prefix = static::getPrefix();
 
         $user = false;
-        while ($row = mysqli_fetch_assoc($result)) $user = $row;
+        foreach ($result as $row) $user = $row;
 
         $valid = (
-            (is_array($user) && array_key_exists("user_password", $user) && static::validatePassword($password, $user["user_password"]))
+            (is_array($user) && array_key_exists($prefix . "password", $user) && static::validatePassword($password, $user[$prefix . "password"]))
             ? $user
             : false
         );
@@ -73,10 +76,19 @@ class User extends Object {
     }
 
     static function register($email, $password, $dci) {
+        // TODO: Input validation.
+        $validEmail = Validation::validateEmail($email);
+        $validPassword = Validation::validatePassword($password);
+        $validDci = Validation::validateDci($dci);
+
+        if (!$validEmail) throw new InvalidInputException("You must submit a valid email.");
+        if (!$validPassword) throw new InvalidInputException("You must submit a valid password.");
+        if (!$validDci) throw new InvalidInputException("You must submit a valid dci number.");
+
         static::bulkInsert(array(array(
-            "email" => $email,
-            "password" => static::generateHashedPassword($password),
-            "dci" => $dci
+            "email" => $validEmail,
+            "password" => static::generateHashedPassword($validPassword),
+            "dci" => $validDci
         )));
 
         global $mysqli;
@@ -84,7 +96,8 @@ class User extends Object {
         $user = ($mysqli->insert_id
             ? array(
                 "id" => $mysqli->insert_id,
-                "dci" => $dci
+                "dci" => $validDci,
+                "email" => $validEmail
             )
             : false);
 
@@ -93,7 +106,8 @@ class User extends Object {
         if (!$user) {
             // On failure, return information.
             $error = $mysqli->error;
-            echo $error;
+            //echo $error;
+            // TODO: Better error handling.
             return -1;
         } else {
             return static::STATUS_VALID;
@@ -102,10 +116,11 @@ class User extends Object {
 
     static function setLoggedIn($user=false) {
         //session_start();
+        $prefix = static::getPrefix();
         if ($user) {
-            $_SESSION["id"] = $user["user_id"];
-            $_SESSION["dci"] = $user["user_dci"];
-            $_SESSION["email"] = $user["user_email"];
+            $_SESSION["id"] = $user[$prefix . "id"];
+            $_SESSION["dci"] = $user[$prefix . "dci"];
+            $_SESSION["email"] = $user[$prefix . "email"];
         } else {
             unset($_SESSION["id"]);
             unset($_SESSION["dci"]);
