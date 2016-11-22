@@ -5,6 +5,7 @@ require_once (getenv("SITE_ROOT_API_TOURNAMENT") . '\src\config\app_config.php')
 
 use kahra\src\database\Object;
 use kahra\src\database\Pairing;
+use kahra\src\database\Player;
 use kahra\src\database\Tournament;
 use kahra\src\database\Round;
 use kahra\src\database\Bye;
@@ -13,6 +14,84 @@ use kahra\src\database\Seat;
 
 use kahra\src\view\View;
 use kahra\src\view\APIResponse;
+
+class TournamentView extends View {
+    static function show($tournaments=false) {
+        if ($tournaments) {
+            $tournament_ids = array();
+
+            foreach ($tournaments as $tournament) {
+                $tournament_ids[] = $tournament[Object::getPrefix() . "id"];
+                $tournament["rounds"] = array();
+                $tournament["players"] = array();
+                $tournament["players"]["debug"] = "not null plz";
+            }
+
+            $rounds = Round::getByFields("tournament_id", $tournament_ids);
+            $players = Player::getByTournamentIds($tournament_ids);
+
+            if ($players) {
+                foreach ($players as $player) {
+                    // Do any adjustments.
+                    // TODO: Calculate points below, or fetch via MySQL.
+                    $players[$player["dci"]]["points"] = -1;
+                }
+            }
+
+            if ($rounds) {
+                $round_ids = array();
+
+                foreach ($rounds as $round) {
+                    $round_ids[] = $round[Object::getPrefix() . "id"];
+                    $round["matches"] = array();
+                    $round["byes"] = array();
+                }
+                // TODO: do this better. There's a getByTournamentIds function in Player.
+                $matches = Match::getByFields("round_id", $round_ids);
+                $byes = Bye::getByFields("round_id", $round_ids);
+
+                if ($matches) {
+                    $match_ids = array();
+
+                    foreach ($matches as $match) {
+                        $match_ids[] = $match[Object::getPrefix() . "id"];
+                        $match["seats"] = array();
+                    }
+
+                    $seats = Seat::getByFields("match_id", $match_ids);
+
+                    if ($seats) {
+                        foreach($seats as $seat) {
+                            $matches[$seat[Object::getPrefix() . "match_id"]]["seats"][] = $seat;
+
+                            if ($players && !empty($players[$seat["player_id"]])) {
+                                $player = $players[$seat["player_id"]];
+
+                                $match = $matches[$seat["match_id"]];
+                                $round = $rounds[$match["round_id"]];
+                                $tournament_id = $round["tournament_id"];
+                                $tournaments[$tournament_id]["players"][$seat["player_id"]] = $player;
+                            }
+                        }
+                    }
+
+                    foreach($matches as $match) {
+                        $rounds[$match[Object::getPrefix() . "round_id"]]["matches"][] = $match;
+                    }
+                }
+
+                foreach($rounds as $round) {
+                    $tournaments[$round[Object::getPrefix() . "tournament_id"]]["rounds"][] = $round;
+                }
+            }
+
+            //echo "<pre>" . View::formatSuccessResponse("Fetched tournaments.", $tournaments) . "</pre>";
+            echo APIResponse::getSuccess("Fetched tournaments.", $tournaments);
+        } else {
+            echo APIResponse::getFailure(-1, "No tournaments found.");
+        }
+    }
+}
 
 // API OPTIONS
 
@@ -86,9 +165,10 @@ function show($tournaments=false) {
             }
         }
 
-        echo "<pre>" . View::formatSuccessResponse("Fetched tournaments.", $tournaments) . "</pre>";
+        //echo "<pre>" . View::formatSuccessResponse("Fetched tournaments.", $tournaments) . "</pre>";
+        echo APIResponse::getSuccess("Fetched tournaments.", $tournaments);
     } else {
-        ?>No tournaments found.<?php
+        echo APIResponse::getFailure(-1, "No tournaments found.");
     }
 }
 
@@ -159,7 +239,7 @@ if ($tournaments) {
     ?>No tournaments found.<?php
 }*/
 
-show(getTournaments());
+TournamentView::show(getTournaments());
 
 //print_r($_GET);
 

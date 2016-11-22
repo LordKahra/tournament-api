@@ -2,14 +2,6 @@
 
 namespace kahra\src\file;
 
-//require_once $_SERVER['DOCUMENT_ROOT'] . (strpos($_SERVER['DOCUMENT_ROOT'], 'pairings') === false ? '/pairings' : '') . '/scripts/database_connection.php';
-
-/*require_once (SITE_ROOT . "/src/model/Player.php");
-require_once (SITE_ROOT . "/src/model/Pairing.php");
-require_once (SITE_ROOT . "/src/model/Tournament.php");
-require_once (SITE_ROOT . "/src/util/util.php");
-require_once (SITE_ROOT . "/src/util/email.php");*/
-
 use kahra\src\database\Object;
 use kahra\src\database\Player;
 use kahra\src\database\Pairing;
@@ -18,7 +10,10 @@ use kahra\src\database\Round;
 use kahra\src\database\Bye;
 use kahra\src\database\Match;
 use kahra\src\database\Seat;
+use kahra\src\database\Upload;
 use kahra\src\exception\InsertFailureException;
+use kahra\src\exception\SQLException;
+use kahra\src\exception\SQLInsertException;
 use kahra\src\util\Debug;
 use kahra\src\util\Email;
 
@@ -82,31 +77,41 @@ class WERParser {
 
      */
 
+    /**
+     * @param bool $where
+     * @param bool $forceUpdate
+     *
+     * @deprecated
+     */
     public static function updateTournaments($where=false, $forceUpdate=false) {
         Debug::log(static::TAG, "Entered.");
         $tournaments = new Tournament();
         $records = Tournament::get($where);
+        $prefix = Tournament::getPrefix();
 
         // If results were found, iterate through and update.
         if ($records) {
-            while ($record = mysqli_fetch_assoc($records)) {
-                Debug::log(static::TAG, "Parsing record " . $record["tournament_id"] . ".\");</script>");
-                $fileName = SITE_ROOT . "/" . static::UPLOAD_DIRECTORY . "/" . $record["tournament_id"] . ".wer";
+            foreach ($records as $record) {
+            //while ($record = mysqli_fetch_assoc($records)) {
+                Debug::log(static::TAG, "Parsing record " . $record[$prefix . "id"] . ".\");</script>");
+                $fileName = SITE_ROOT . "/" . static::UPLOAD_DIRECTORY . "/" . $record[$prefix . "id"] . ".wer";
+
                 Debug::log(static::TAG, getcwd());
                 if (file_exists($fileName)) {
                     $testDate = filemtime($fileName);
-                    $updated = intval($record["tournament_last_updated"]);
+                    $updated = intval($record[$prefix . "last_updated"]);
                     Debug::log(static::TAG, "testDate: " . $testDate . " updated: " . $updated);
                     if ($updated != $testDate OR $forceUpdate) {
                         Debug::log(static::TAG, "WERParser.updateTournaments(): Updating tournament.");
-                        static::updateTournament($record);
+                        // TODO: This method is now broken.
+                        //static::updateTournament($record);
                     } else {
                         Debug::log(static::TAG, "WERParser.updateTournaments(): No need to update. last update: " . $updated);
                     }
                     Debug::log(static::TAG, "WERParser.updateTournaments(): Done parsing.");
                 } else {
                     // TODO: Better support for issues with missing files.
-                    Debug::log(static::TAG, "File missing for tournament " . $record["tournament_id"] . ".");
+                    Debug::log(static::TAG, "File missing for tournament " . $record[$prefix . "id"] . ".");
                     Debug::log(static::TAG, "File: " . $fileName);
                 }
             }
@@ -115,32 +120,54 @@ class WERParser {
         }
     }
 
-    public static function updateTournament($record) {
-        $tournaments = new Tournament();
-        $pairings = new Pairing();
+    /**
+     * @param $upload_id
+     *
+     * @throws SQLException if the upload_id is invalid.
+     * @throws SQLInsertException
+     */
+    public static function updateTournament($upload_id) {
+        // Fetch the upload.
+        $uploads = Upload::getById($upload_id);
+        $upload = false;
+        foreach ($uploads as $currentUpload) $upload = $currentUpload;
+        if (!$upload) {
+            // The upload_id is wrong.
+            throw new SQLException("Failed to find the file upload data.");
+        }
+        $tournament_id = $upload["tournament_id"];
 
-        // Delete the old pairings.
-        Debug::log(static::TAG, "WERParser.updateTournament(): Deleting records from tournament " . $record['tournament_id'] . ".");
-        //echo "<script>console.log(\"WERParser.updateTournament(): Deleting records from tournament " . $record['tournament_id'] . ".\");</script>";
-        Pairing::delete("tournament_id = " . $record["tournament_id"]);
+        $prefix = Tournament::getPrefix();
 
-        $where = "id = " . $record["tournament_id"];
-        $filename = SITE_ROOT . "/" . static::UPLOAD_DIRECTORY . "/" . $record["tournament_id"] . ".wer";
-        //$filename = static::UPLOAD_DIRECTORY . "/" . $record["tournament_id"] . ".wer";
+        // Delete the old tournament data.
+        Tournament::resetData($tournament_id);
 
+        $filename = TOURNAMENT_UPLOAD_DIRECTORY . "/" . $upload["id"] . ".wer";
+
+        // Get the file data.
         $body = file_get_contents($filename);
-        static::handleWERText($body, $record["tournament_id"]);
-        // Update with the new file date.
+        // TODO: More error checking.
+
+        // Update the player data.
+        static::updatePlayerData($body);
+
+        // Update the tournament.
+        //static::handleWERText($body, $tournament_id);
+        Tournament::generateData(new WERDocument($body), $tournament_id);
+
+        // Set the tournament as last updated now.
         $fields = array(
             "last_updated" => filemtime($filename)
         );
-        Tournament::update($fields, $where);
+        Tournament::update($fields, "id = " . $tournament_id);
 
         // Notify the players.
-        static::notifyPlayers($record["tournament_id"]);
+        static::notifyPlayers($tournament_id);
     }
 
     public static function notifyPlayers($tournamentID) {
+        return;
+        // TODO: Needs major overhaul.
         Debug::log(static::TAG, "notifyPlayers(): Entered.");
         // Get the pairing data.
         $pairings = new Pairing();
@@ -200,16 +227,14 @@ class WERParser {
         }
     }
 
+    // Updates the tournament data.
     public static function handleWERText($body, $tournamentID) {
         Debug::log(static::TAG, "handleWERText(): Entered.");
-        // Create database access variables.
-        $pairings = new Pairing();
 
         // Update the player data.
         static::updatePlayerData($body);
 
-        $dom = new \DOMDocument();
-        $dom->loadXML($body);
+        $dom = new WERDocument($body);
         $participation  = ($dom->getElementsByTagName(WERParser::TAG_PARTICIPATION));
         $participation  = $participation->item(0);
         $matches        = $dom->getElementsByTagName(WERParser::TAG_MATCHES);
@@ -219,19 +244,17 @@ class WERParser {
         $seats          = $dom->getElementsByTagName(WERParser::TAG_SEATS);
         $seats          = $seats->item(0);
 
-        Debug::log(static::TAG, "handleWERText(): Elements created.");
+        //Debug::log(static::TAG, "handleWERText(): Elements created.");
 
         // HANDLING PARTICIPATION
         // FUCK IT WE HAVE A FUNCTION FOR THAT
 
         // HANDLING MATCHES
-        $currentRound = 0;
-        $currentMatch = 0;
         $rounds = $matches->getElementsByTagName(WERParser::TAG_ROUND);
         $roundArray = array();
         $assortedMatches = array();
 
-        Debug::log(static::TAG, "handleWERText(): Iterating through rounds.");
+        //Debug::log(static::TAG, "handleWERText(): Iterating through rounds.");
 
         $roundInsertData = array();
 

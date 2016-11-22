@@ -10,8 +10,8 @@ class Round extends Object {
     const TABLE_NAME        = "rounds";
     const NAME_SINGULAR     = "round";
     const ALIAS             = "round";
-    const FIELDS_SELECT     = "id,tournament_id,index";
-    const FIELDS_INSERT     = "tournament_id,index";
+    const FIELDS_SELECT     = "id,tournament_id,r_index";
+    const FIELDS_INSERT     = "tournament_id,r_index";
 
     static function getChildren() {
         // TODO: Implement.
@@ -21,5 +21,13 @@ class Round extends Object {
 
     static function getByTournamentId($id) {
         return static::getByField("tournament_id", $id);
+    }
+
+    static function deleteByTournamentId($id) {
+        // Delete matches and byes first.
+        Match::deleteByTournamentId($id);
+        Bye::deleteByTournamentId($id);
+
+        return static::deleteByField("tournament_id", $id);
     }
 }

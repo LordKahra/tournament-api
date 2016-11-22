@@ -3,6 +3,7 @@
 define("LOG_FILE", SITE_ROOT . "/log/debug.log");
 define("ERROR_PAGE", SITE_HOST . "/src/view/error.php");
 define("UPLOAD_DIRECTORY", SITE_ROOT . "/res/upload");
+define("TOURNAMENT_UPLOAD_DIRECTORY", UPLOAD_DIRECTORY . "/tournament");
 define("LOGO_URL", SITE_HOST . "/res/drawable/logo.png");
 
 // Error Reporting.
@@ -26,6 +27,7 @@ session_start();
 // SCRIPTS
 require_once SITE_ROOT . "/src/config/database_connection.php";
 require_once SITE_ROOT . "/src/util/authentication.php";
+require_once SITE_ROOT . "/src/util/arrayset.php";
 require_once SITE_ROOT . "/src/util/util.php";
 require_once SITE_ROOT . "/src/util/upload.php";
 require_once SITE_ROOT . "/src/util/email.php";
@@ -35,6 +37,7 @@ require_once SITE_ROOT . "/src/util/validation.php";
 // MODEL REQUIREMENTS
 require_once SITE_ROOT . "/src/exception/Exception.php";
 require_once SITE_ROOT . "/src/database/Object.php";
+require_once SITE_ROOT . "/src/database/Token.php";
 require_once SITE_ROOT . "/src/database/Player.php";
 require_once SITE_ROOT . "/src/database/Tournament.php";
 require_once SITE_ROOT . "/src/database/Round.php";
@@ -46,16 +49,19 @@ require_once SITE_ROOT . "/src/database/User.php";
 require_once SITE_ROOT . "/src/database/Store.php";
 require_once SITE_ROOT . "/src/database/Upload.php";
 
+require_once SITE_ROOT . "/src/file/WERDocument.php";
+
 // VIEW REQUIREMENTS
+require_once SITE_ROOT . "/src/view/APIResponse.php";
 require_once SITE_ROOT . "/src/view/View.php";
 
 // SYSTEM FUNCTIONS
 
-function handle_error($user_error_message, $system_error_message) {
+/*function handle_error($user_error_message, $system_error_message) {
     $_SESSION['error_message'] = $user_error_message;
     $_SESSION['system_error_message'] = $system_error_message;
-    header("Location: " . get_web_path(ERROR_PAGE));
-}
+    header("Location: " . SITE_HOST . "/" . get_web_path(ERROR_PAGE));
+}*/
 
 function contains($haystack, $needle) {
     $position = strpos($haystack, $needle);

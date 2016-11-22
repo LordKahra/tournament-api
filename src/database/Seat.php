@@ -22,4 +22,28 @@ class Seat extends Object {
     static function getByPlayerId($player_id) {
         return static::getByField("player_id", $player_id);
     }
+
+    static function getByTournamentId($id) {
+        static::get(
+            "match_id IN (
+                SELECT id FROM matches WHERE round_id IN (
+                    SELECT id
+                    FROM rounds
+                    WHERE tournament_id = '$id'
+                )
+            )"
+        );
+    }
+
+    static function deleteByTournamentId($id) {
+        static::delete(
+            "match_id IN (
+                SELECT id FROM matches WHERE round_id IN (
+                    SELECT id
+                    FROM rounds
+                    WHERE tournament_id = '$id'
+                )
+            )"
+        );
+    }
 }

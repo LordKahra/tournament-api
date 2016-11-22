@@ -1,7 +1,31 @@
 <?php
 
-//require_once str_replace("//", "/", $_SERVER['DOCUMENT_ROOT'] . (((strpos($_SERVER['DOCUMENT_ROOT'], 'wamp') === false)) ? '' : '/pairings') . '/scripts/app_config.php');
 require_once (getenv("SITE_ROOT_API_TOURNAMENT") . '/src/config/app_config.php');
+
+use kahra\src\view\APIResponse;
+
+if (!array_key_exists("type", $_GET)) {
+    // Someone's playing with URLs. Get em out.
+    echo APIResponse::getUnauthorizedResponse("An upload type must be specified.");
+    exit();
+}
+
+switch ($_GET["type"]) {
+    case UPLOAD_PROFILE:
+        echo APIResponse::getFailure(-1, "Not yet implemented.");
+        exit();
+    case UPLOAD_STORE_BANNER:
+        echo APIResponse::getFailure(-1, "Not yet implemented.");
+        exit();
+        // TODO: Non-breaking switch statement when implemented.
+    case UPLOAD_TOURNAMENT:
+        $file = (array_key_exists($_GET["type"], $_FILES)) ? $_FILES[$_GET["type"]] : false;
+        break;
+    default:
+        // Someone's playing with URLs again. Get em out.
+        echo APIResponse::getUnauthorizedResponse("Invalid upload type specified.");
+        exit();
+}
 
 // Determine file information.
 $profile = (array_key_exists(UPLOAD_PROFILE, $_FILES)) ? $_FILES[UPLOAD_PROFILE] : false;

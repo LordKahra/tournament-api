@@ -7,23 +7,40 @@ use kahra\src\database\User;
 
 use kahra\src\view\View;
 
-function getUser() {
-    $users = false;
-
-    if (array_key_exists("id", $_GET)) $users = View::parseResult(User::getById($_GET["id"]));
-    elseif (array_key_exists("user_name", $_GET)) $users = View::parseResult(User::getByField("name", $_GET["user_name"]));
-    else $users = View::parseResult(User::get());
-
-    if ($users) {
-        $object_arrays = User::parseRecords($users);
-
-        echo View::formatSuccessResponse("Fetched users.", $object_arrays);
-    } else {
-        echo View::formatFailureResponse(-1, "No users were found.");
+class UserView extends View {
+    static function show($objects=array()) {
+        // TODO: STRIP PASSWORDS
+        if (!$objects) {
+            echo static::formatFailureResponse(-1, "No users were found.");
+        } else {
+            echo View::formatSuccessResponse("Fetched users.", $objects);
+        }
     }
 }
 
-getUser();
+function getUser() {
+    $users = false;
+
+    //if (array_key_exists("id", $_GET)) $users = UserView::parseResult(User::getById($_GET["id"]));
+    if (array_key_exists("user_id", $_GET)) $users = User::getById($_GET["user_id"]);
+    //elseif (array_key_exists("user_name", $_GET)) $users = UserView::parseResult(User::getByField("name", $_GET["user_name"]));
+    elseif (array_key_exists("user_name", $_GET)) $users = User::getByField("name", $_GET["user_name"]);
+    //else $users = UserView::parseResult(User::get());
+    else $users = User::get();
+
+    return $users;
+
+    /*if ($users) {
+        //$object_arrays = User::parseRecords($users);
+
+        //echo View::formatSuccessResponse("Fetched users.", $object_arrays);
+        echo View::formatSuccessResponse("Fetched users.", $users);
+    } else {
+        echo View::formatFailureResponse(-1, "No users were found.");
+    }*/
+}
+
+UserView::show(getUser());
 
 /*$objects = false;
 $errors = [];

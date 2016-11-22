@@ -11,6 +11,12 @@ use kahra\src\util\Debug;
 
 //$player = Player::getAlias();
 
+/**
+ * Class Pairing
+ * @package kahra\src\database
+ *
+ * @deprecated
+ */
 class Pairing extends Object {
     const TABLE_NAME        = "pairings";
     const NAME_SINGULAR     = "pairing";

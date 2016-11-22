@@ -12,24 +12,63 @@ use kahra\src\database\Pairing;
 use kahra\src\database\Tournament;
 
 ?>
+<!DOCTYPE html>
+<head>
+    <style type="text/css">
+        html, body {
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+        }
 
-    <header>Share tournament pairings. Instantly.</header>
+        article section, article form {
+            display: inline-block;
+        }
 
-    <form action="<?php echo SITE_HOST; ?>/tournament/upload" method="post" enctype="multipart/form-data">
-        <input name="tournament" type="file" />
-        Programs currently supported:
-        Wizards Event Reporter
-        <input type="submit" value="Upload" name="submit" />
-    </form>
+        article section:first-of-type {
+            padding-right: 64px;
+            width: 100px;
+            height: 64px;
+            line-height: 64px;
+            background-position: right;
+            background-repeat: no-repeat;
+        }
 
-    <form action="<?php echo SITE_HOST; ?>/login" method="post" enctype="multipart/form-data">
-        <p>Email <input name="email" type="email" /></p>
-        <p>Password <input name="password" type="password" /></p>
-        <input type="submit" value="Log In" name="submit" />
-    </form>
+        section.true {
+            background-image: url("<?=SITE_HOST; ?>/res/images/true.png");
+        }
 
-    <p><a href="<?=SITE_HOST;?>/logout">Logout</a></p>
+        section.false {
+            background-image: url("<?=SITE_HOST; ?>/res/images/false.png");
+        }
+    </style>
+</head>
 
+<body>
+
+    <header>Welcome to the API's debugging page. ^_^;;</header>
+
+    <article>
+        <section>Upload.</section>
+
+        <form action="<?php echo SITE_HOST; ?>/tournament/upload" method="post" enctype="multipart/form-data">
+            <input name="tournament" type="file" />
+            Programs currently supported:
+            Wizards Event Reporter
+            <input type="submit" value="Upload" name="submit" />
+        </form>
+    </article>
+
+    <article>
+        <section class="<?=(isLoggedIn() ? "true" : "false");?>">Logged in: <?=(isLoggedIn() ? getLoggedInUserId() : "");?></section>
+
+        <form action="<?php echo SITE_HOST; ?>/login" method="post" enctype="multipart/form-data">
+            <p>Email <input name="email" type="email" /></p>
+            <p>Password <input name="password" type="password" /></p>
+            <input type="submit" value="Log In" name="submit" />
+        </form>
+
+        <section><a href="<?=SITE_HOST;?>/logout">Logout</a></section>
+    </article>
 
     <p>Store Update</p>
 
@@ -40,5 +79,12 @@ use kahra\src\database\Tournament;
         <input type="submit" value="Update" name="submit" />
     </form>
 
+    <?php
 
+    $werDocument = new \kahra\src\file\WERDocument(file_get_contents("test_first_round.wer"));
+
+    ?>
+
+</body>
+</html>
 

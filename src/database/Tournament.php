@@ -2,7 +2,11 @@
 
 namespace kahra\src\database;
 
+use kahra\src\exception\SQLInsertException;
+use kahra\src\file\WERDocument;
+use kahra\src\util\Debug;
 use kahra\src\util\Str;
+use kahra\src\util\ArraySet;
 
 use kahra\src\database\User;
 use kahra\src\database\Store;
@@ -77,7 +81,119 @@ class Tournament extends Object {
     // CUSTOM QUERIES
 
     static function getByUserId($user_id) {
-        return self::get("user_id = " . $user_id);
+        return static::get("user_id = " . $user_id);
+    }
+
+    /**
+     * Reset all pairing data for a specific tournament.
+     *
+     * @param int $id The id of the tournament to reset.
+     */
+    static function resetData($id) {
+        // Delete the rounds.
+        Debug::log("Tournament.deleteData()", "Entered.");
+        Round::deleteByTournamentId($id);
+        Debug::log("Tournament.deleteData()", "Done.");
+    }
+
+    /**
+     * Generates the data for a tournament.
+     *
+     * @param WERDocument $document A WERDocument upload containing all tournament data.
+     * @param int $tournament_id The tournament id.
+     *
+     * @throws SQLInsertException if there is an issue inserting any of the data.
+     *
+     * @return void
+     */
+    static function generateData(WERDocument $document, $tournament_id) {
+        // Get the relevant data.
+        $rounds = $document->rounds;
+        $matches = $document->matches;
+        $byes = $document->byes;
+        $seats = $document->seats;
+        $roundPrefix = Round::getPrefix();
+        $matchPrefix = Match::getPrefix();
+
+        // If there are no rounds, return.
+        if (count($rounds) < 1) return;
+
+        //echo "<h1>TOURN ID WITHIN GENERATEDATA: $tournament_id</h1>";
+
+        var_dump($rounds);
+
+        // Set the tournament id for the rounds.
+        ArraySet::setAll("tournament_id", $tournament_id, $rounds);
+
+        //var_dump($rounds);
+
+        // Insert the rounds.
+        Round::bulkInsert($rounds);
+
+        // Fetch the rounds.
+        $roundRecords = Round::getByTournamentId($tournament_id);
+
+        if (!$roundRecords) {
+            // There MUST be at least one round to reach this point.
+            // If there are no records, something went wrong.
+            // Clean up and throw.
+            Tournament::resetData($tournament_id);
+            throw new SQLInsertException("Error while inserting rounds.");
+        }
+
+        // Map the round ids.
+        $roundIdMap = array();
+        foreach ($roundRecords as $round_id => $round) {
+            $roundIdMap[$round[$roundPrefix . "r_index"]] = $round_id;
+        }
+
+        // Add the correct round ids to the matches and byes, and unset the round index.
+        $matchData = array();
+        $byeData = array();
+        foreach ($matches as $roundIndex => $matchSet) {
+            foreach ($matchSet as $match) {
+                $match["round_id"] = $roundIdMap[$roundIndex];
+                unset($match["round_index"]);
+                $matchData[] = $match;
+                // TODO: I don't think the unset is actually necessary.
+            }
+        }
+
+        foreach ($byes as $roundIndex => $byeSet) {
+            foreach ($byeSet as $bye) {
+                $bye["round_id"] = $roundIdMap[$roundIndex];
+                unset($bye["round_index"]);
+                $byeData[] = $bye;
+            }
+        }
+
+        // Insert the matches and byes.
+        Match::bulkInsert($matchData);
+        Bye::bulkInsert($byeData);
+
+        // Fetch the matches.
+        $matchRecords = Match::getByTournamentId($tournament_id);
+
+        //var_dump($matchRecords);
+
+        // Map the round ids.
+        $matchIdMap = array();
+        foreach ($matchRecords as $match_id => $match)
+            $matchIdMap[$match[$matchPrefix . "table_id"]] = $match_id;
+
+        // Add the correct match ids to the seats, and add the seats to a data set.
+        $seatData = array();
+        foreach ($seats as $table => $seatSet) {
+            foreach ($seatSet as $seat) {
+                $seat["match_id"] = $matchIdMap[$table];
+                $seatData[] = $seat;
+            }
+        }
+
+        // Insert the seats.
+        Seat::bulkInsert($seatData);
+
+        // Done!
     }
 
     /*static function getChildren() {

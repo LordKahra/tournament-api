@@ -23,6 +23,36 @@ class Player extends Object {
         );
     }
 
+    static function getByTournamentId($id) {
+        return static::get(
+            "dci IN (
+                SELECT player_id FROM seats WHERE match_id IN (
+                    SELECT id FROM matches WHERE round_id IN (
+                        SELECT id
+                        FROM rounds
+                        WHERE tournament_id = '$id'
+                    )
+                )
+            )"
+        );
+    }
+
+    static function getByTournamentIds($ids) {
+        return static::get(
+            "dci IN (
+                SELECT player_id FROM seats WHERE match_id IN (
+                    SELECT id FROM matches WHERE round_id IN (
+                        SELECT id
+                        FROM rounds
+                        WHERE tournament_id IN ('" . implode("','", $ids) . "')
+                    )
+                )
+            )"
+        );
+    }
+
+
+
     /*function subscribe($dci, $email) {
         $query =
             "INSERT INTO " . self::getTableName() .

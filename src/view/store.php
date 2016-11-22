@@ -4,13 +4,14 @@
 require_once (getenv("SITE_ROOT_API_TOURNAMENT") . '\src\config\app_config.php');
 
 use kahra\src\database\Store;
+use kahra\src\database\User;
 use kahra\src\view\APIResponse;
 use kahra\src\view\View;
 
 if (array_key_exists("action", $_GET)) {
     switch ($_GET["action"]) {
         case "add":
-            if (!isLoggedIn()) {
+            if (!User::isAuthenticated()) {
                 echo APIResponse::getUnauthorizedResponse("You must be logged in to add a store.");
                 break;
             }
@@ -24,7 +25,7 @@ if (array_key_exists("action", $_GET)) {
 
             break;
         case "update":
-            if (!isLoggedIn()) {
+            if (!User::isAuthenticated()) {
                 echo APIResponse::getUnauthorizedResponse("You must be logged in to update a store.");
                 break;
             }
@@ -60,7 +61,7 @@ if (array_key_exists("action", $_GET)) {
 
             break;
         case "mine":
-            if (!isLoggedIn()) {
+            if (!User::isAuthenticated()) {
                 echo APIResponse::getUnauthorizedResponse("You must be logged in to see your stores.");
                 break;
             }
@@ -94,5 +95,5 @@ if (array_key_exists("action", $_GET)) {
     }
 }
 
-
+exit();
 ?>

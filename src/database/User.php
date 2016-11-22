@@ -2,9 +2,12 @@
 
 namespace kahra\src\database;
 
+use kahra\src\exception\InvalidEmailException;
 use kahra\src\exception\InvalidInputException;
+use kahra\src\exception\InvalidPasswordException;
 use kahra\src\util\Validation;
 use kahra\src\database\Object;
+use kahra\src\database\Token;
 
 class User extends Object {
     const FIELD_ID          = "id";
@@ -19,6 +22,7 @@ class User extends Object {
     const STATUS_INVALID_PASSWORD = 3;
     const STATUS_DUPLICATE_EMAIL = 4;
     const STATUS_DUPLICATE_DCI = 5;
+    const STATUS_INVALID_TOKEN = 5;
 
     /*static function getJoins($includeChildren=true) {
         $alias = static::ALIAS;
@@ -52,23 +56,110 @@ class User extends Object {
         );
     }
 
-    // Returns status.
-    static function login($email, $password) {
-        $result = static::getByField("email", $email);
+    // Parent function that checks if the user's token is valid.
+    static function isAuthenticated() {
+        // If a token exists, use it.
+        if (array_key_exists("token", $_POST)) User::authenticate($_POST["token"]);
+        else static::setLoggedIn(false);
+
+        // TODO: Check for time on remaining token.
+
+        // Finally, check if they're logged in.
+        return isLoggedIn();
+    }
+
+    //
+    static function authenticate($token) {
+        $result = static::getByActiveToken($token);
         $prefix = static::getPrefix();
 
         $user = false;
         foreach ($result as $row) $user = $row;
 
-        $valid = (
-            (is_array($user) && array_key_exists($prefix . "password", $user) && static::validatePassword($password, $user[$prefix . "password"]))
-            ? $user
-            : false
-        );
+        $valid = ((
+            $user
+            && is_array($user)
+            && array_key_exists($prefix . "id", $user)
+            && $user[$prefix . "id"]
+        ) ? $user : false);
+
+        //return $valid;
+
+        // Why store the session data? Why not simply return the user data?
 
         static::setLoggedIn($valid);
 
-        return (!$user ? static::STATUS_INVALID_EMAIL : (!$valid ? static::STATUS_INVALID_PASSWORD : static::STATUS_VALID));
+        return isLoggedIn();
+    }
+
+    // Returns the generated token.
+    static function login($email, $password) {
+        $validEmail = Validation::validateEmail($email);
+        $validPassword = Validation::validatePassword($password);
+
+        if (!$validEmail) throw new InvalidInputException("You must submit a valid email.");
+        if (!$validPassword) throw new InvalidInputException("You must submit a valid password.");
+
+        // Query the database.
+
+        $result = static::getByField("email", $validEmail);
+        $prefix = static::getPrefix();
+
+        $user = false;
+        foreach ($result as $row) $user = $row;
+
+        // Make sure we found a user.
+        if (!$user) throw new InvalidEmailException("Invalid email.");
+
+        // Make sure their password is correct.
+        $valid = ((
+            $user
+            && is_array($user)
+            && array_key_exists($prefix . "id", $user)
+            && array_key_exists($prefix . "password", $user)
+            && $user[$prefix . "id"]
+            && static::authenticatePassword($validPassword, $user[$prefix . "password"])
+        ) ? $user : false);
+
+        if (!$valid) throw new InvalidPasswordException("Invalid password.");
+
+        // They're good! Return true.
+
+        // TODO: Going stateless.
+        //static::setLoggedIn($valid);
+
+        //if (!isLoggedIn()) throw new InvalidPasswordException("Invalid password.");
+
+        // Generate a token.
+        $token = Token::create($user[$prefix . "id"]);
+
+        //throw new InvalidPasswordException("DEBUG");
+
+        return array(
+            "id" => $user[$prefix . "id"],
+            "dci" => $user[$prefix . "dci"],
+            "email" => $validEmail,
+            "token" => $token
+        );
+
+        //return ((!isLoggedIn() || !$user) ? static::STATUS_INVALID_EMAIL : (!$valid ? static::STATUS_INVALID_PASSWORD : static::STATUS_VALID));
+    }
+
+    static function isActiveToken($user_id, $token) {
+        return static::get(
+            "id IN (
+                SELECT user_id
+                FROM tokens
+                WHERE token = '$token' AND expiration > NOW()
+                ) AND id = '$user_id'");
+    }
+
+    static function getByToken($token) {
+        return static::get("id IN (SELECT user_id FROM tokens WHERE token = '$token')");
+    }
+
+    static function getByActiveToken($token) {
+        return static::get("id IN (SELECT user_id FROM tokens WHERE token = '$token' AND expiration > NOW())");
     }
 
     static function logout() {
@@ -77,6 +168,7 @@ class User extends Object {
 
     static function register($email, $password, $dci) {
         // TODO: Input validation.
+        //$validId = false;
         $validEmail = Validation::validateEmail($email);
         $validPassword = Validation::validatePassword($password);
         $validDci = Validation::validateDci($dci);
@@ -84,6 +176,8 @@ class User extends Object {
         if (!$validEmail) throw new InvalidInputException("You must submit a valid email.");
         if (!$validPassword) throw new InvalidInputException("You must submit a valid password.");
         if (!$validDci) throw new InvalidInputException("You must submit a valid dci number.");
+
+        // Query the database.
 
         static::bulkInsert(array(array(
             "email" => $validEmail,
@@ -93,14 +187,21 @@ class User extends Object {
 
         global $mysqli;
 
-        $user = ($mysqli->insert_id
+        return ($mysqli->insert_id
             ? array(
                 "id" => $mysqli->insert_id,
                 "dci" => $validDci,
-                "email" => $validEmail
+                "email" => $validEmail,
+                "token" => Token::create($mysqli->insert_id)
             )
             : false);
 
+        // Generate a token.
+        //$token = Token::create($mysqli->insert_id);
+
+        //return $user;
+
+        /*
         static::setLoggedIn($user);
 
         if (!$user) {
@@ -112,12 +213,19 @@ class User extends Object {
         } else {
             return static::STATUS_VALID;
         }
+        */
     }
 
     static function setLoggedIn($user=false) {
         //session_start();
         $prefix = static::getPrefix();
-        if ($user) {
+        if (
+            $user
+            && is_array($user)
+            && array_key_exists($prefix . "id", $user)
+            && array_key_exists($prefix . "dci", $user)
+            && array_key_exists($prefix . "email", $user)
+        ) {
             $_SESSION["id"] = $user[$prefix . "id"];
             $_SESSION["dci"] = $user[$prefix . "dci"];
             $_SESSION["email"] = $user[$prefix . "email"];
@@ -132,7 +240,7 @@ class User extends Object {
         return password_hash($password, PASSWORD_BCRYPT);
     }
 
-    static function validatePassword($password, $hash) {
+    static function authenticatePassword($password, $hash) {
         return password_verify($password, $hash);
     }
 

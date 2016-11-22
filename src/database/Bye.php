@@ -22,4 +22,24 @@ class Bye extends Object {
     static function getByPlayerId($id) {
         return static::getByField("player_id", $id);
     }
+
+    static function getByTournamentId($id) {
+        static::get(
+            "round_id IN (
+                SELECT id
+                FROM rounds
+                WHERE tournament_id = '$id'
+            )"
+        );
+    }
+
+    static function deleteByTournamentId($id) {
+        static::delete(
+            "round_id IN (
+                SELECT id
+                FROM rounds
+                WHERE tournament_id = '$id'
+            )"
+        );
+    }
 }

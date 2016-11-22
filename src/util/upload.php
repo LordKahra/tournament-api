@@ -19,6 +19,9 @@ const UPLOAD_STORE_BANNER = "store";
 
 const MESSAGE_SUCCESS = "success";
 
+/**
+    Uploads a tournament, creating an upload_id, and a tournament_id if necessary.
+ */
 function uploadTournament($fileData, $fileExtension, $tournamentId=false) {
     // Determine if the user is logged in.
     $isLoggedIn = isLoggedIn();
@@ -27,7 +30,8 @@ function uploadTournament($fileData, $fileExtension, $tournamentId=false) {
     if ($error = hasUploadError($fileData, $fileExtension, UPLOAD_TOURNAMENT)) return $error;
 
     // Place according to type. If the folder doesn't exist, throw an error and notify admins.
-    $fileDir = UPLOAD_DIRECTORY . "/" . UPLOAD_TOURNAMENT;
+    //$fileDir = UPLOAD_DIRECTORY . "/" . UPLOAD_TOURNAMENT;
+    $fileDir = TOURNAMENT_UPLOAD_DIRECTORY;
     if ($error = isMissingUploadDirectory($fileDir)) return $error;
 
     // Name according to tournament id, or for anonymous users, timestamp.
@@ -45,7 +49,9 @@ function uploadTournament($fileData, $fileExtension, $tournamentId=false) {
     $result = uploadFile($fileData, $fileDir, $fileName, $uploadId);
 
     // Recheck all tournaments.
-    WERParser::updateTournaments();
+    //WERParser::updateTournaments();
+    // Update the uploaded tournament.
+    WERParser::updateTournament($uploadId);
 
     // Return the result.
     return $result;
@@ -214,7 +220,7 @@ function onUploadError($message) {
     /*$site = SITE_HOST . "" .
         ($message ? "?message=" . urlencode($message) : "") .
         ($redirect ? ($message ? "&" : "?") . "redirect=" . urlencode($redirect) : "");
-    header("Location: " . $site);
+    header("Location: " . SITE_HOST . "/" . $site);
     exit();*/
     return $message;
 }
@@ -232,9 +238,9 @@ function onSuccessfulUpload($type, $id=false) {
             $header = "store" . ($id ? "/" . $id : "");
             break;
     }
+    // TODO: Header testing.
     $header .= "?updated=1";
-    //echo $header;
-    header("Location: " . $header);
+    header("Location: " . SITE_HOST . "/" . $header);
     exit();
 }
 

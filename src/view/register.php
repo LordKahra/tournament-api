@@ -18,28 +18,28 @@ $dci = (isset($_GET["dci"]) ? $_GET["dci"] : false);
 */
 
 // Is the user already logged in?
-if (isLoggedIn()) {
+// TODO: Moving to statelessness.
+/*if (isLoggedIn()) {
     echo View::formatSuccessResponse("You are already logged in.");
     exit();
-}
+}*/
 
 // Did the user submit email, password and dci data?
 
 if ($email && $password && $dci) {
     // The user submitted data. Validate.
     try {
-        $status = User::register($email, $password, $dci);
+        $user = User::register($email, $password, $dci);
 
-        // Did they succeed? If so, return.
-        if (isLoggedIn()) {
-            echo View::formatSuccessResponse("Successfully registered.");
+        // Did they succeed? If so, return their information.
+        //if (isLoggedIn()) {
+        if ($user) {
+            echo View::formatSuccessResponse("Successfully registered.", $user);
         } else {
-            echo View::formatFailureResponse(
-                -1,
-                ($status == User::STATUS_DUPLICATE_EMAIL
+            echo View::formatFailureResponse(-1, "Registration failure. Better errors TODO.");
+                /*($status == User::STATUS_DUPLICATE_EMAIL
                     ? "That email already exists."
-                    : "That dci is already associated with an account.")
-            );
+                    : "That dci is already associated with an account.")*/
             // TODO: Better error checking.
         }
     } catch (InvalidInputException $e) {

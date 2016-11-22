@@ -268,7 +268,7 @@ abstract class Object {
     // QUERIES : INSERT ////////////
     ////////////////////////////////
 
-    static function insert($fields) {
+    static function insert($fields, $raw=false) {
         $requiredFields = static::getRequiredFields();
 
         // Check for required fields.
@@ -282,7 +282,7 @@ abstract class Object {
 
         foreach ($fields as $key => $value) {
             $keyString      .= (empty($keyString)   ? "" : ",") . $key;
-            $valueString    .= (empty($valueString) ? "" : ",") . "\"" . $value . "\"";
+            $valueString    .= (empty($valueString) ? "" : ",") . ($raw ? "" : "\"") . $value . ($raw ? "" : "\"");
         }
 
         $query =
@@ -320,7 +320,7 @@ abstract class Object {
                 "(" . implode(",", $fields) . ") " .
             "VALUES " .
                 $values;
-        //echo $query;
+        //echo "<p>" . $query . "</p>";
         global $mysqli;
         $results = $mysqli->query($query);
         return $mysqli->insert_id;
@@ -358,6 +358,10 @@ abstract class Object {
 
         global $mysqli;
         return $where ? $mysqli->query($query) : false;
+    }
+
+    static function deleteByField($key, $value) {
+        return static::delete($key . " = \"" . $value . "\"");
     }
 
     ////////////////////////////////
