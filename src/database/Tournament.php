@@ -120,7 +120,7 @@ class Tournament extends Object {
 
         //echo "<h1>TOURN ID WITHIN GENERATEDATA: $tournament_id</h1>";
 
-        var_dump($rounds);
+        //var_dump($rounds);
 
         // Set the tournament id for the rounds.
         ArraySet::setAll("tournament_id", $tournament_id, $rounds);

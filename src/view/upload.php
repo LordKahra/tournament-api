@@ -29,13 +29,19 @@ switch ($_GET["type"]) {
 
 // Determine file information.
 $profile = (array_key_exists(UPLOAD_PROFILE, $_FILES)) ? $_FILES[UPLOAD_PROFILE] : false;
-$tournament = (array_key_exists(UPLOAD_TOURNAMENT, $_FILES)) ? $_FILES[UPLOAD_TOURNAMENT] : false;
+$tournament = (isset($_POST["tournament"]) && !empty($_POST["tournament"])) ? $_POST["tournament"] : false;
+//$tournament = $_FILES[UPLOAD_TOURNAMENT];
 $store = (array_key_exists(UPLOAD_STORE_BANNER, $_FILES)) ? $_FILES[UPLOAD_STORE_BANNER] : false;
 
 // Get type specific information.
 $tournamentId = ($tournament && isset($_POST["tournament_id"]) && !empty($_POST["tournament_id"])) ? $_POST["tournament_id"] : false;
 $storeId = ($store && isset($_POST["store_id"]) && !empty($_POST["store_id"])) ? $_POST["store_id"] : false;
 
+$pathinfo = ($tournament && isset($_POST["pathinfo"]) && !empty($_POST["pathinfo"])) ? $_POST["pathinfo"] : false;
+
+var_dump($_POST);
+
+exit();
 // Send it along.
 
 $profileResponse = ($profile ? upload($profile["tmp_name"], pathinfo($profile["name"])["extension"], UPLOAD_PROFILE) : false);

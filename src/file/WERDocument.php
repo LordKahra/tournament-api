@@ -2,9 +2,10 @@
 
 namespace kahra\src\file;
 
+use DOMDocument;
 use kahra\src\util\Debug;
 
-class WERDocument extends \DOMDocument {
+class WERDocument extends DOMDocument {
     const TAG = "WERParser";
 
     const TAG_EVENT = 'event';

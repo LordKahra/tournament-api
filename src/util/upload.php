@@ -57,7 +57,7 @@ function uploadTournament($fileData, $fileExtension, $tournamentId=false) {
     return $result;
 }
 
-function getUploadId($tournament_id) {
+/*function getUploadId($tournament_id) {
     // Get the current time.
 
     // Insert the upload into the database.
@@ -69,12 +69,12 @@ function getUploadId($tournament_id) {
     return $uploadId;
 }
 
-function getTournamentId($isLoggedIn, $tournamentId=false) {
+function getTournamentId($tournamentId=false) {
     // If there's no tournamentId, create a new tournament.
     $id = $tournamentId ? $tournamentId : Tournament::insert(array("name" => "New Tournament"));
 
     return $id;
-}
+}*/
 
 function hasUploadError($fileData, $fileExtension, $type) {
     // File must not be empty.
