@@ -22,8 +22,6 @@ if (!Validation::validateWERDocument($tournament, $extension)) {
     exit();
 }
 
-// TODO: HERE
-
 // Get the tournament metadata, or create it.
 try {
     $tournament_id = getTournamentId($tournament_id);
@@ -33,11 +31,7 @@ try {
     exit();
 }
 
-echo APIResponse::getFailure(-1, "Debugging.");
-exit();
-
-
-
+// TODO: HERE
 
 // TODO: Validate tournament_id and upload_id.
 
