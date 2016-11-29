@@ -25,7 +25,13 @@ if (!Validation::validateWERDocument($tournament, $extension)) {
 
 // Get the tournament metadata, or create it.
 $tournament_id = getTournamentId($tournament_id);
+
+echo APIResponse::getFailure(-1, "Debugging.");
+exit();
+
 $uploadId = getUploadId($tournament_id);
+
+
 
 // TODO: Validate tournament_id and upload_id.
 
@@ -37,8 +43,7 @@ if (!Validation::validateUploadDirectory($fileDir)) {
 
 //$fullPath = TOURNAMENT_UPLOAD_DIRECTORY . "/" . $uploadId . "." . $extension;
 
-echo APIResponse::getFailure(-1, "Debugging.");
-exit();
+// TODO: NOT HERE
 
 try {
     $s3 = \Aws\S3\S3Client::factory();
