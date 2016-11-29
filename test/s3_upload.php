@@ -23,8 +23,10 @@ if (
             fopen($_FILES['userfile']['tmp_name'], 'rb'),
             'public-read'
         );
+        ?><p>Upload <a href="<?=htmlspecialchars($upload->get('ObjectURL'))?>">successful</a> :)</p><?php
     } catch(Exception $e) {
         ?><p>Upload error :(</p><?php
+        var_dump($e);
     }
 }
 
