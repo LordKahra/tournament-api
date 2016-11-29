@@ -25,7 +25,7 @@ if (
         );
         ?><p>Upload <a href="<?=htmlspecialchars($upload->get('ObjectURL'))?>">successful</a> :)</p><?php
     } catch(Exception $e) {
-        ?><p>Upload error :(</p><?php
+        ?><p>Upload error :( <?=$e->getMessage();?></p><?php
         var_dump($e);
     }
 }
