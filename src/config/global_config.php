@@ -5,6 +5,8 @@ define("ERROR_PAGE", SITE_HOST . "/src/view/error.php");
 define("UPLOAD_DIRECTORY", SITE_ROOT . "/res/upload");
 define("TOURNAMENT_UPLOAD_DIRECTORY", UPLOAD_DIRECTORY . "/tournament");
 define("LOGO_URL", SITE_HOST . "/res/drawable/logo.png");
+define("BUCKET", getenv("S3_BUCKET_NAME"));
+define("TOURNAMENT_DIRECTORY", "tournaments/");
 
 // Error Reporting.
 error_reporting(DEBUG_MODE ? E_ALL : 0);

@@ -21,20 +21,44 @@ if (!Validation::validateWERDocument($tournament, $extension)) {
     exit();
 }
 
+// Get the tournament metadata, or create it.
 $tournament_id = getTournamentId($tournament_id);
 $uploadId = getUploadId($tournament_id);
 
 // TODO: Validate tournament_id and upload_id.
 
-$fileDir = TOURNAMENT_UPLOAD_DIRECTORY;
+/*$fileDir = TOURNAMENT_UPLOAD_DIRECTORY;
 if (!Validation::validateUploadDirectory($fileDir)) {
     echo APIResponse::getFailure(-1, "Critical backend error. An administrator has been notified.");
     exit();
+}*/
+
+//$fullPath = TOURNAMENT_UPLOAD_DIRECTORY . "/" . $uploadId . "." . $extension;
+
+try {
+    $s3 = \Aws\S3\S3Client::factory();
+    $upload = $s3->upload(
+        BUCKET,
+        TOURNAMENT_DIRECTORY . $uploadId . ".wer",
+        $tournament,
+        'public-read'
+    );
+
+    $uploadUrl = $upload->get('ObjectURL');
+
+
+    // Success.
+    // Update the uploaded tournament.
+    WERParser::updateTournament($uploadId);
+
+    echo APIResponse::getSuccess("Upload successful.", $tournament_id);
+    exit();
+} catch (\Aws\CloudFront\Exception\Exception $e) {
+    echo APIResponse::getFailure(-1, "There was a server error completing your upload. If the issue persists, please contact support.");
+    exit();
 }
 
-$fullPath = TOURNAMENT_UPLOAD_DIRECTORY . "/" . $uploadId . "." . $extension;
-
-if (file_put_contents($fullPath, $tournament) === false) {
+/*if (file_put_contents($fullPath, $tournament) === false) {
     // Failure.
     echo APIResponse::getFailure(-1, "There was a server error completing your upload. If the issue persists, please contact support.");
     exit();
@@ -46,10 +70,7 @@ WERParser::updateTournament($uploadId);
 
 
 echo APIResponse::getSuccess("Upload successful.", $tournament_id);
-exit();
-
-
-
+exit();*/
 
 function getUploadId($tournament_id) : int {
     // Get the current time.
@@ -66,6 +87,8 @@ function getUploadId($tournament_id) : int {
 function getTournamentId($tournament_id=false) : int {
     // If the tournament id is valid, return.
     if ($tournament_id) return $tournament_id;
+
+    // TODO: Authenticate upload privileges.
 
     // If there's no tournament_id, create a new tournament.
     $data = array("name" => "New Tournament");

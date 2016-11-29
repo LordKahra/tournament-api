@@ -3,7 +3,9 @@
 // FILE UPLOADS MUST BE SET TO ON IN php.ini!!!
 
 require_once SITE_ROOT . '/src/file/WERParser.php';
+require(SITE_ROOT . '/vendor/autoload.php');
 
+use Aws\CloudFront\Exception\Exception;
 use kahra\src\database\Tournament;
 use kahra\src\database\Upload;
 use kahra\src\exception\UploadFailureException;
@@ -29,6 +31,39 @@ function uploadTournament($fileData, $fileExtension, $tournamentId=false) {
     // Validate the data.
     if ($error = hasUploadError($fileData, $fileExtension, UPLOAD_TOURNAMENT)) return $error;
 
+    // Get the tournament ID, or create a new one.
+    $tournamentId = getTournamentId($tournamentId);
+    $uploadId = getUploadId($tournamentId);
+
+    if (!$tournamentId || !$uploadId) {
+        throw new UploadFailureException("Error encountered while generating tournament metadata.");
+    }
+
+    try {
+        $s3 = \Aws\S3\S3Client::factory();
+        $upload = $s3->upload(
+            BUCKET_TOURNAMENT,
+            $uploadId . ".wer",
+            $fileData,
+            'public-read'
+        );
+        /*$upload = $s3->upload(
+            BUCKET_TOURNAMENT,
+            $_FILES['userfile']['name'],
+            fopen($_FILES['userfile']['tmp_name'], 'rb'),
+            'public-read'
+        );*/
+        $uploadUrl = $upload->get('ObjectURL');
+
+
+        WERParser::updateTournament($uploadId);
+
+        // Success.
+        return true;
+    } catch (Exception $e) {
+        throw $e;
+    }
+
     // Place according to type. If the folder doesn't exist, throw an error and notify admins.
     //$fileDir = UPLOAD_DIRECTORY . "/" . UPLOAD_TOURNAMENT;
     $fileDir = TOURNAMENT_UPLOAD_DIRECTORY;
@@ -36,7 +71,7 @@ function uploadTournament($fileData, $fileExtension, $tournamentId=false) {
 
     // Name according to tournament id, or for anonymous users, timestamp.
 
-    $tournamentId = getTournamentId($isLoggedIn, $tournamentId);
+    $tournamentId = getTournamentId($tournamentId);
     $uploadId = getUploadId($tournamentId);
 
     if (!$tournamentId || !$uploadId) {
