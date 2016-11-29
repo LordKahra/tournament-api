@@ -10,6 +10,8 @@ use kahra\src\util\Validation;
 
 use kahra\src\view\APIResponse;
 
+// TODO: HERE
+
 $tournament = (array_key_exists("upload_data", $_POST)) ? $_POST["upload_data"] : false;
 
 // Get type specific information.
@@ -20,6 +22,11 @@ if (!Validation::validateWERDocument($tournament, $extension)) {
     echo APIResponse::getFailure(-1, "Upload is not a valid WERDocument.");
     exit();
 }
+
+
+
+echo APIResponse::getFailure(-1, "Debugging.");
+exit();
 
 // Get the tournament metadata, or create it.
 $tournament_id = getTournamentId($tournament_id);
