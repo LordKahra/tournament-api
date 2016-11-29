@@ -268,6 +268,12 @@ abstract class Object {
     // QUERIES : INSERT ////////////
     ////////////////////////////////
 
+    /**
+     * @param $fields
+     * @param bool $raw
+     * @return bool|mixed
+     * @throws SQLInsertException
+     */
     static function insert($fields, $raw=false) {
         $requiredFields = static::getRequiredFields();
 
