@@ -49,7 +49,7 @@ try {
 
     // Success.
     // Update the uploaded tournament.
-    WERParser::updateTournament($uploadId);
+    //TODO: WERParser::updateTournament($uploadId);
 
     echo APIResponse::getSuccess("Upload successful.", $tournament_id);
     exit();

@@ -55,8 +55,8 @@ function uploadTournament($fileData, $fileExtension, $tournamentId=false) {
         );*/
         $uploadUrl = $upload->get('ObjectURL');
 
-
-        WERParser::updateTournament($uploadId);
+        // TODO: Skip updating.
+        //WERParser::updateTournament($uploadId);
 
         // Success.
         return true;
