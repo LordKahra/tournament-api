@@ -170,7 +170,7 @@ class Tournament extends Object {
 
             // Insert the matches and byes.
             Match::bulkInsert($matchData);
-            Bye::bulkInsert($byeData);
+            if ($byeData) Bye::bulkInsert($byeData);
 
             // Fetch the matches.
             $matchRecords = Match::getByTournamentId($tournament_id);
