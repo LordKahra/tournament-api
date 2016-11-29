@@ -329,6 +329,7 @@ abstract class Object {
         //echo "<p>" . $query . "</p>";
         global $mysqli;
         $results = $mysqli->query($query);
+        if (!$results) throw new SQLInsertException("Failed to insert " . static::ALIAS . " with error: " . $mysqli->error);
         return $mysqli->insert_id;
     }
 
