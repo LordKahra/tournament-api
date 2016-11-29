@@ -126,16 +126,16 @@ class WERParser {
      * @throws SQLException if the upload_id is invalid.
      * @throws SQLInsertException
      */
-    public static function updateTournament($upload_id) {
+    public static function updateTournament($upload_id, $tournament_id, $upload_data) {
         // Fetch the upload.
         $uploads = Upload::getById($upload_id);
         $upload = false;
         foreach ($uploads as $currentUpload) $upload = $currentUpload;
         if (!$upload) {
             // The upload_id is wrong.
-            throw new SQLException("Failed to find the file upload data.");
+            throw new SQLException("Failed to find the file upload metadata.");
         }
-        $tournament_id = $upload["tournament_id"];
+        //$tournament_id = $upload["tournament_id"];
 
         $prefix = Tournament::getPrefix();
 
@@ -145,7 +145,8 @@ class WERParser {
         $filename = TOURNAMENT_UPLOAD_DIRECTORY . "/" . $upload["id"] . ".wer";
 
         // Get the file data.
-        $body = file_get_contents($filename);
+        //$body = file_get_contents($filename);
+        $body = $upload_data;
         // TODO: More error checking.
 
         // Update the player data.

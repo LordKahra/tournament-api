@@ -86,7 +86,7 @@ function uploadTournament($fileData, $fileExtension, $tournamentId=false) {
     // Recheck all tournaments.
     //WERParser::updateTournaments();
     // Update the uploaded tournament.
-    WERParser::updateTournament($uploadId);
+    WERParser::updateTournament($uploadId, $fileData);
 
     // Return the result.
     return $result;

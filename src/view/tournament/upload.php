@@ -59,12 +59,15 @@ try {
 
     // Success.
     // Update the uploaded tournament.
-    //TODO: WERParser::updateTournament($uploadId);
+    WERParser::updateTournament($uploadId, $tournament_id, $tournament);
 
     echo APIResponse::getSuccess("Upload successful.", $tournament_id);
     exit();
 } catch (\Aws\CloudFront\Exception\Exception $e) {
     echo APIResponse::getFailure(-1, "There was a server error completing your upload. If the issue persists, please contact support.");
+    exit();
+} catch (SQLInsertException $e) {
+    echo APIResponse::getFailure(-1, "There was an error parsing the uploaded tournament: " . $e->getMessage());
     exit();
 }
 
