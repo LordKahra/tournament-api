@@ -27,7 +27,7 @@ try {
     $tournament_id = getTournamentId($tournament_id);
     $uploadId = getUploadId($tournament_id);
 } catch (SQLInsertException $e) {
-    echo APIResponse::getFailure(-1, $e->getMessage());
+    echo APIResponse::getFailure(-1, $e->getMessage() . " Query: " . $e->getQuery());
     exit();
 }
 
@@ -67,7 +67,7 @@ try {
     echo APIResponse::getFailure(-1, "There was a server error completing your upload. If the issue persists, please contact support.");
     exit();
 } catch (SQLInsertException $e) {
-    echo APIResponse::getFailure(-1, "There was an error parsing the uploaded tournament: " . $e->getMessage());
+    echo APIResponse::getFailure(-1, "There was an error parsing the uploaded tournament: " . $e->getMessage() . " Query: " . $e->getQuery());
     exit();
 }
 
