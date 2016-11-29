@@ -4,7 +4,17 @@ namespace kahra\src\exception;
 
 use Exception;
 
-class SQLException extends Exception {}
+class SQLException extends Exception {
+    private $query;
+    function __construct($message, $query=false) {
+        parent::__construct($message);
+        $this->query = $query ? $query : "Unknown query.";
+    }
+
+    public function getQuery() {
+        return $this->query;
+    }
+}
 class SQLInsertException extends SQLException {}
 class SQLUpdateException extends SQLException {}
 

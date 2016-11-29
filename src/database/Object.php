@@ -303,7 +303,7 @@ abstract class Object {
         //var_dump($fields);
         //var_dump($results);
         //print_r($mysqli);
-        if (!$results) throw new SQLInsertException("Failed to insert " . static::ALIAS . " with error: " . $mysqli->error);
+        if (!$results) throw new SQLInsertException("Failed to insert " . static::ALIAS . " with error: " . $mysqli->error, $query);
         return $mysqli->insert_id;
         // TODO: FULL SWAP OVER TO STATUS => true/false
     }
@@ -329,7 +329,7 @@ abstract class Object {
         //echo "<p>" . $query . "</p>";
         global $mysqli;
         $results = $mysqli->query($query);
-        if (!$results) throw new SQLInsertException("Failed to insert " . static::ALIAS . " with error: " . $mysqli->error);
+        if (!$results) throw new SQLInsertException("Failed to insert " . static::ALIAS . " with error: " . $mysqli->error, $query);
         return $mysqli->insert_id;
     }
 
