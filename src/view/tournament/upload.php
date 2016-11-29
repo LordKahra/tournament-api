@@ -10,9 +10,6 @@ use kahra\src\util\Validation;
 
 use kahra\src\view\APIResponse;
 
-echo APIResponse::getFailure(-1, "Debugging.");
-exit();
-
 $tournament = (array_key_exists("upload_data", $_POST)) ? $_POST["upload_data"] : false;
 
 // Get type specific information.
