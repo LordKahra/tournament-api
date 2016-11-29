@@ -1,0 +1,15 @@
+{
+    "name": "kahra/tournament-cloud",
+    "description": "Share tournaments. Instantly.",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Kahra",
+            "email": "lordkahra@gmail.com"
+        }
+    ],
+    "require": {
+      "php": ">=5.3.3",
+      "aws/aws-sdk-php": "~2.6"
+    }
+}
