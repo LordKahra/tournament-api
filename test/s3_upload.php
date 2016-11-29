@@ -3,7 +3,7 @@
 require('../vendor/autoload.php');
 
 $s3 = \Aws\S3\S3Client::factory();
-$bucket = getenv("S3_BUCKET");
+$bucket = getenv("S3_BUCKET_NAME");
 
 ?>
 <!DOCTYPE html>
@@ -17,6 +17,7 @@ if (
     && is_uploaded_file($_FILES['userfile']['tmp_name'])
 ) {
     try {
+
         $upload = $s3->upload(
             $bucket,
             $_FILES['userfile']['name'],
