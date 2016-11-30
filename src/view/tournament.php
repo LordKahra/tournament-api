@@ -105,8 +105,9 @@ function getTournaments() {
     if (array_key_exists("tournament_id", $_GET)) {
         //$tournaments = View::parseResult(Tournament::getById($_GET["tournament_id"]));
         $tournaments = Tournament::getById($_GET["tournament_id"]);
+    } elseif (array_key_exists("tournament_vanity_url", $_GET)) {
+        $tournaments = Tournament::getByField("vanity_url", $_GET["tournament_vanity_url"]);
     } elseif (array_key_exists("tournament_name", $_GET)) {
-        //$tournaments = View::parseResult(Tournament::getByField("name", $_GET["tournament_name"]));
         $tournaments = Tournament::getByField("name", $_GET["tournament_name"]);
     } else {
         //$tournaments = View::parseResult(Tournament::get());

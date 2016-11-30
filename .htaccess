@@ -51,7 +51,7 @@ RewriteRule ^tournament\/upload(\/?)$ src/view/tournament/upload.php [NC,L]
 # SITE/tournament/[id]
 RewriteRule ^tournament\/([0-9]+)(\/?)$ src/view/tournament.php?tournament_id=$1 [NC,L]
 # SITE/tournament/[name]
-RewriteRule ^tournament\/([A-Za-z0-9]+)(\/?)$ src/view/tournament.php?tournament_name=$1 [NC,L]
+RewriteRule ^tournament\/([A-Za-z0-9]+)(\/?)$ src/view/tournament.php?tournament_vanity_url=$1 [NC,L]
 
 #
 # LEVEL ONE
