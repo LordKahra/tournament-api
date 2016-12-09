@@ -90,6 +90,19 @@ class TournamentView extends View {
             echo APIResponse::getFailure(-1, "No tournaments found.");
         }
     }
+
+    static function handleAction($action) : bool {
+        switch ($action) {
+            case "get":
+                $tournaments = false;
+                if (array_key_exists("tournament_id", $_GET)) $tournaments = Tournament::getById($_GET["tournament_id"]);
+                //elseif (array_key_exists("tournament_name", $_GET)) $tournaments = Tournament::getByField("name", $_GET["tournament_name"]);
+                else $tournaments = Tournament::get();
+                static::show($tournaments);
+                return true;
+        }
+        return false;
+    }
 }
 
 // API OPTIONS

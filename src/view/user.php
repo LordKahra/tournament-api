@@ -16,6 +16,21 @@ class UserView extends View {
             echo View::formatSuccessResponse("Fetched users.", $objects);
         }
     }
+
+    static function handleAction($action) : bool {
+        switch ($action) {
+            case "get":
+                $users = false;
+                if (array_key_exists("user_id", $_GET)) $users = User::getById($_GET["user_id"]);
+                elseif (array_key_exists("user_name", $_GET)) $users = User::getByField("name", $_GET["user_name"]);
+                else $users = User::get();
+                echo ($users
+                    ? View::formatSuccessResponse("Fetched users.", $users)
+                    : static::formatFailureResponse(-1, "No users were found."));
+                return true;
+        }
+        return false;
+    }
 }
 
 function getUser() {
@@ -40,7 +55,7 @@ function getUser() {
     }*/
 }
 
-UserView::show(getUser());
+//UserView::show(getUser());
 
 /*$objects = false;
 $errors = [];
@@ -126,7 +141,8 @@ if ($objects) {
     ?>No users found.<?php
 }*/
 
-
+UserView::handleRequest();
+exit();
 
 
 ?>

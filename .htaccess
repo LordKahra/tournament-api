@@ -8,27 +8,20 @@ RewriteCond %{REQUEST_FILENAME} !-d
 # LEVEL FOUR
 #
 
-# SITE/user/[id]/tournament/[id]
-#RewriteRule ^user\/([0-9]*)\/tournament\/([0-9]*)(\/?)$ src/view/user.php?user_id=$1&tournament_id=$2 [NC,L]
-
 #
 # LEVEL THREE
 #
-
-# SITE/user/id/[id]
-RewriteRule ^u\/id\/([0-9]+)(\/?)$ src/view/user.php?type=user&id=$1 [NC,L]
-
-# SITE/user/tournament/[name]
-#RewriteRule ^user\/tournament\/([A-Za-z0-9]+)(\/?)$ src/view/user.php?tournament_name=$1 [NC,L]
 
 #
 # LEVEL TWO
 #
 
+# SITE/user/command
+RewriteRule ^user\/update(\/?)$ src/view/user.php?action=update [NC,L]
 # SITE/user/[id]
-RewriteRule ^user\/([0-9]+)(\/?)$ src/view/user.php?user_id=$1 [NC,L]
+RewriteRule ^user\/([0-9]+)(\/?)$ src/view/user.php?action=get&user_id=$1 [NC,L]
 # SITE/user/[name]
-RewriteRule ^user\/([A-Za-z0-9]+)(\/?)$ src/view/user.php?user_name=$1 [NC,L]
+RewriteRule ^user\/([A-Za-z0-9]+)(\/?)$ src/view/user.php?action=get&user_name=$1 [NC,L]
 
 # SITE/store/command
 RewriteRule ^store\/add(\/?)$ src/view/store.php?action=add [NC,L]
@@ -62,11 +55,9 @@ RewriteRule ^login(\/?)$ src/view/login.php [NC,L]
 RewriteRule ^logout(\/?)$ src/view/logout.php [NC,L]
 RewriteRule ^register(\/?)$ src/view/register.php [NC,L]
 RewriteRule ^settings(\/?)$ src/view/settings.php [NC,L]
-RewriteRule ^t(\/?)$ src/view/tournament.php [NC,L]
 RewriteRule ^tournament(\/?)$ src/view/tournament.php [NC,L]
-RewriteRule ^u(\/?)$ src/view/user.php?type=user [NC,L]
-RewriteRule ^user(\/?)$ src/view/user.php?type=user [NC,L]
-RewriteRule ^store(\/?)$ src/view/store.php [NC,L]
+RewriteRule ^user(\/?)$ src/view/user.php?action=get [NC,L]
+RewriteRule ^store(\/?)$ src/view/store.php?action=get [NC,L]
 RewriteRule ^match(\/?)$ src/view/match.php [NC,L]
 RewriteRule ^player(\/?)$ src/view/player.php [NC,L]
 RewriteRule ^auth(\/?)$ src/view/auth.php [NC,L]
