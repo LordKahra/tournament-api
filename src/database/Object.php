@@ -257,8 +257,11 @@ abstract class Object {
         return static::getByField(static::getAlias() . "." . static::getIDField(), $value);
     }
 
-    static function getByField($key, $value) {
-        return static::get($key . " = \"" . $value . "\"");
+    static function getByField($key, $value, $quotes=true) {
+        return static::get(($quotes
+            ? $key . " = \"" . $value . "\""
+            : "$key = $value"
+        ));
     }
 
     static function getByFields($key, $values) {
