@@ -13,6 +13,9 @@ class UserView extends View {
         if (!$objects) {
             echo static::formatFailureResponse(-1, "No users were found.");
         } else {
+            foreach($objects as $object) {
+                if (array_key_exists("password", $object)) unset($object["password"]);
+            }
             echo View::formatSuccessResponse("Fetched users.", $objects);
         }
     }

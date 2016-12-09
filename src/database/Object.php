@@ -16,6 +16,7 @@ abstract class Object {
     const FIELDS_SELECT     = false;
     const FIELDS_INSERT     = false;
     const FIELDS_UPSERT     = false;
+    const FIELDS_PRIVATE    = false;
     const DEFAULT_SORT      = false;
     const IS_PREFIXED       = false;
 

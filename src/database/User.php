@@ -16,6 +16,7 @@ class User extends Object {
     const ALIAS             = "user";
     const FIELDS_SELECT     = "id,dci,email,password,is_subscribed";
     const FIELDS_INSERT     = "email,password,dci";
+    const FIELDS_PRIVATE    = "password";
 
     const STATUS_VALID = 1;
     const STATUS_INVALID_EMAIL = 2;

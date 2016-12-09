@@ -14,6 +14,8 @@ class APIResponse {
     // RAW ////
 
     static function get($status, $code, $message, $objects = false) {
+        header('Content-Type: application/json');
+
         $response = array(
             "status" => $status,
             "code" => $code,
