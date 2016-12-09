@@ -1,5 +1,7 @@
 <?php
 
+namespace kahra\src\view;
+
 require_once (getenv("SITE_ROOT_API_TOURNAMENT") . '/src/config/app_config.php');
 
 use kahra\src\database\Object;

@@ -10,7 +10,7 @@ use kahra\src\view\APIResponse;
 use kahra\src\view\View;
 
 class StoreView extends View {
-    static function show($objects) {
+    static function show($objects=array()) {
         // TODO: Implement show() method.
     }
 
@@ -78,8 +78,8 @@ class StoreView extends View {
                 else echo APIResponse::getSuccess("You have " . count($stores) . " stores.", $stores);
                 return true;
             case "get":
-                $id = (isset($_GET["store_id"]) ? $_GET["store_id"] : false);
-                $vanity_url = (isset($_GET["vanity_url"]) ? $_GET["vanity_url"] : false);
+                $id = (array_key_exists("store_id", $_GET) ? $_GET["store_id"] : false);
+                $vanity_url = (array_key_exists("vanity_url", $_GET) ? $_GET["vanity_url"] : false);
 
                 $stores = false;
 
@@ -91,10 +91,15 @@ class StoreView extends View {
                     $stores = Store::get();
                 }
 
+                // TODO: Debugging.
+                //$stores = Store::get();
+                //echo APIResponse::getSuccess("Debugging.", $stores);
+                //return true;
+
                 if (!$stores || !is_array($stores) || count($stores) < 1) {
                     echo APIResponse::getFailure(APIResponse::CODE_EMPTY_SET, "No stores found.");
                 } else {
-                    echo APIResponse::getSuccess("Store found.", $stores);
+                    echo APIResponse::getSuccess("Stores found.", $stores);
                 }
                 return true;
         }
