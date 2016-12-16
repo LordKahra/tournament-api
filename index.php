@@ -58,7 +58,7 @@ use kahra\src\database\Tournament;
     </article>
 
     <article>
-        <section class="<?=(isLoggedIn() ? "true" : "false");?>">Logged in: <?=(isLoggedIn() ? getLoggedInUserId() : "");?></section>
+        <section class="<?=(isAuthenticated() ? "true" : "false");?>">Logged in: <?=(isAuthenticated() ? getLoggedInUserId() : "");?></section>
 
         <form action="<?php echo SITE_HOST; ?>/login" method="post" enctype="multipart/form-data">
             <p>Email <input name="email" type="email" /></p>

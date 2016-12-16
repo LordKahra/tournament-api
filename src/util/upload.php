@@ -26,7 +26,7 @@ const MESSAGE_SUCCESS = "success";
  */
 function uploadTournament($fileData, $fileExtension, $tournamentId=false) {
     // Determine if the user is logged in.
-    $isLoggedIn = isLoggedIn();
+    $isLoggedIn = isAuthenticated();
 
     // Validate the data.
     if ($error = hasUploadError($fileData, $fileExtension, UPLOAD_TOURNAMENT)) return $error;
@@ -143,7 +143,7 @@ function hasUploadError($fileData, $fileExtension, $type) {
 
 function upload($fileData, $fileExtension, $type) {
     // User must be logged in for profile and store uploads.
-    $isLoggedIn = isLoggedIn();
+    $isLoggedIn = isAuthenticated();
     if (!$isLoggedIn) {
         if ($type != UPLOAD_TOURNAMENT) onFailedAuthentication();
     }

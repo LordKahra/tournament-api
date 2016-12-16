@@ -9,7 +9,7 @@ class Store extends Object {
     const TABLE_NAME        = "stores";
     const NAME_SINGULAR     = "store";
     const ALIAS             = "store";
-    const FIELDS_SELECT     = "id,user_id,name,vanity_url,site";
+    const FIELDS_SELECT     = "id,user_id,name,vanity_url,site,location_id";
     const FIELDS_INSERT     = "user_id,name,country";
 
     /*static function getChildren() {

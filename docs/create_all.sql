@@ -1,3 +1,22 @@
+CREATE TABLE notifications
+(
+  id INT(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  type INT(11) NOT NULL,
+  name VARCHAR(64) NOT NULL,
+  body TEXT NOT NULL
+);
+
+CREATE TABLE locations
+(
+  id INT(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  address_1 VARCHAR(255) NOT NULL,
+  address_2 VARCHAR(255),
+  city VARCHAR(255) NOT NULL,
+  state VARCHAR(255) NOT NULL,
+  zip VARCHAR(64) NOT NULL,
+  country VARCHAR(255) DEFAULT 'US' NOT NULL
+);
+
 CREATE TABLE byes
 (
   id INT(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
@@ -97,4 +116,15 @@ CREATE TABLE users
   password VARCHAR(64) NOT NULL,
   is_subscribed TINYINT(1) DEFAULT '1' NOT NULL
 );
+
+# STORE -> LOCATION
+# STORE -> USER
+
+CREATE INDEX stores_locations_id_fk ON stores (location_id);
+CREATE INDEX stores_user_id_ind ON stores (user_id);
+
+# USER / dci
 CREATE UNIQUE INDEX users_dci_uindex ON users (dci);
+
+# STORE / vanity_url
+CREATE UNIQUE INDEX stores_url_uindex ON stores (vanity_url);

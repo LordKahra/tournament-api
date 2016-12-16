@@ -18,11 +18,11 @@ $token = (isset($_POST["token"]) ? $_POST["token"] : false);
 
 if ($token) {
     // The user submitted data. Validate.
-    $status = User::authenticate($token);
+    authenticate($token);
 
     // Did they succeed? If so, return.
     echo (
-        isLoggedIn()
+    isAuthenticated()
             ? View::formatSuccessResponse("Successful login.")
             : View::formatFailureResponse(-1, "Invalid token."));
     exit();
@@ -30,7 +30,7 @@ if ($token) {
     // The user didn't submit a token.
     // TODO: Should users who don't submit a token be logged out?
     echo (
-        isLoggedIn()
+    isAuthenticated()
             ? View::formatSuccessResponse("You are already logged in.")
             : View::formatFailureResponse(-1, "Authentication requires user token."));
     exit();

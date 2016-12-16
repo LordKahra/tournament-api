@@ -115,7 +115,7 @@ function getTournamentId($tournament_id=false) : int {
 
     // If there's no tournament_id, create a new tournament.
     $data = array("name" => "New Tournament");
-    if (User::isAuthenticated()) $data["user_id"] = getLoggedInUserId();
+    if (isAuthenticated()) $data["user_id"] = getLoggedInUserId();
 
     return Tournament::insert($data);
 }

@@ -15,9 +15,12 @@ $password = (isset($_POST["password"]) ? $_POST["password"] : false);
 $persistent = (isset($_POST["persistent"]) ? $_POST["persistent"] : true);
 
 // Is the user already logged in?
-if (isLoggedIn()) {
-    echo View::formatSuccessResponse("You are already logged in.");
-    exit();
+if (isAuthenticated()) {
+    // Since they're attempting to authenticate, log them out and proceed as normal.
+    // TODO: An alternative is to send a success response with the current user data.
+    setLoggedIn(false);
+    //echo View::formatSuccessResponse("You are already logged in.");
+    //exit();
 }
 
 // Did the user submit email and password data?

@@ -17,7 +17,7 @@ class StoreView extends View {
     static function handleAction($action) : bool {
         switch ($action) {
             case "add":
-                if (!User::isAuthenticated()) {
+                if (!isAuthenticated()) {
                     echo APIResponse::getUnauthorizedResponse("You must be logged in to add a store.");
                     return true;
                 }
@@ -31,7 +31,7 @@ class StoreView extends View {
 
                 return true;
             case "update":
-                if (!User::isAuthenticated()) {
+                if (!isAuthenticated()) {
                     echo APIResponse::getUnauthorizedResponse("You must be logged in to update a store.");
                     return true;
                 }
@@ -67,14 +67,14 @@ class StoreView extends View {
 
                 return true;
             case "mine":
-                if (!User::isAuthenticated()) {
+                if (!isAuthenticated()) {
                     echo APIResponse::getUnauthorizedResponse("You must be logged in to see your stores.");
                     return true;
                 }
 
                 $stores = Store::getByUserId(getLoggedInUserId());
 
-                if (!$stores) echo APIResponse::getEmptyDataResponse("You have no stores.");
+                if (!$stores) echo APIResponse::getEmptyDataResponse("User " . getLoggedInUserId() . " has no stores.");
                 else echo APIResponse::getSuccess("You have " . count($stores) . " stores.", $stores);
                 return true;
             case "get":

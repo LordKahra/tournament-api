@@ -58,20 +58,20 @@ class User extends Object {
     }
 
     // Parent function that checks if the user's token is valid.
-    static function isAuthenticated() {
+    /*static function isAuthenticated() {
         // If a token exists, use it.
-        if (array_key_exists("token", $_POST)) User::authenticate($_POST["token"]);
-        else static::setLoggedIn(false);
+        if (array_key_exists("token", $_POST)) authenticate($_POST["token"]);
+        else setLoggedIn(false);
 
         // TODO: Check for time on remaining token.
 
         // Finally, check if they're logged in.
         return isLoggedIn();
-    }
+    }*/
 
     //
-    static function authenticate($token) {
-        $result = static::getByActiveToken($token);
+    /*static function authenticate($token) {
+        $result = $token ? static::getByActiveToken($token) : array();
         $prefix = static::getPrefix();
 
         $user = false;
@@ -88,10 +88,10 @@ class User extends Object {
 
         // Why store the session data? Why not simply return the user data?
 
-        static::setLoggedIn($valid);
+        setLoggedIn($valid);
 
-        return isLoggedIn();
-    }
+        //return isLoggedIn();
+    }*/
 
     // Returns the generated token.
     static function login($email, $password) {
@@ -164,7 +164,7 @@ class User extends Object {
     }
 
     static function logout() {
-        static::setLoggedIn(false);
+        setLoggedIn(false);
     }
 
     static function register($email, $password, $dci) {
@@ -217,7 +217,7 @@ class User extends Object {
         */
     }
 
-    static function setLoggedIn($user=false) {
+    /*static function setLoggedIn($user=false) {
         //session_start();
         $prefix = static::getPrefix();
         if (
@@ -235,7 +235,7 @@ class User extends Object {
             unset($_SESSION["dci"]);
             unset($_SESSION["email"]);
         }
-    }
+    }*/
 
     static function generateHashedPassword($password) {
         return password_hash($password, PASSWORD_BCRYPT);
