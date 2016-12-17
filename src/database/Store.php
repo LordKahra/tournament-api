@@ -10,7 +10,7 @@ class Store extends Object {
     const NAME_SINGULAR     = "store";
     const ALIAS             = "store";
     const FIELDS_SELECT     = "id,user_id,name,vanity_url,site,location_id";
-    const FIELDS_INSERT     = "user_id,name,country";
+    const FIELDS_INSERT     = "user_id,name";
 
     /*static function getChildren() {
         return [ static::getGenericChildJoinClause(Tournament::getTableName(), Tournament::getAlias(), Tournament::getParentIDField()) => new Tournament() ];
@@ -40,16 +40,18 @@ class Store extends Object {
         return self::getByField("user_id", $user_id);
     }
 
-    static function create($user_id, $name, $vanity_url=false, $site=false, $country="US") {
+    static function create($user_id, $name, $vanity_url=false, $site=false) {
         // TODO: validation.
         $object = array(
             "user_id" => $user_id,
-            "name" => $name,
-            "country" => $country
+            "name" => $name
         );
         if ($vanity_url) $object["vanity_url"] = $vanity_url;
         if ($site) $object["site"] = $site;
 
-        return self::insert($object);
+        $result = static::insert($object);
+        // TODO: Location data is saved later.
+
+        return $result;
     }
 }

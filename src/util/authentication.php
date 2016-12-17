@@ -4,6 +4,7 @@
 // TODO: Moving to stateless.
 
 use kahra\src\database\User;
+use kahra\src\exception\AuthenticationFailureException;
 
 // STATES
 
@@ -28,8 +29,16 @@ function isAuthenticated() {
 
 // GETTERS
 
-function getLoggedInUserId() {
-    return (isset($_SESSION["id"]) && !empty($_SESSION["id"])) ? $_SESSION["id"] : false;
+/**
+ * @param string $errorMessage
+ * @return int
+ * @throws AuthenticationFailureException
+ */
+function getLoggedInUserId($errorMessage="Not logged in.") : int {
+    if (!isset($_SESSION["id"]) || empty($_SESSION["id"]) || !$_SESSION["id"])
+        throw new AuthenticationFailureException($errorMessage);
+
+    return $_SESSION["id"];
 }
 
 function isMagicPlayer($dci) {

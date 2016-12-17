@@ -5,7 +5,6 @@ define("ERROR_PAGE", SITE_HOST . "/src/view/error.php");
 define("UPLOAD_DIRECTORY", SITE_ROOT . "/res/upload");
 define("TOURNAMENT_UPLOAD_DIRECTORY", UPLOAD_DIRECTORY . "/tournament");
 define("LOGO_URL", SITE_HOST . "/res/drawable/logo.png");
-define("BUCKET", getenv("S3_BUCKET_NAME"));
 define("TOURNAMENT_DIRECTORY", "tournaments/");
 
 // Error Reporting.
@@ -29,7 +28,7 @@ session_start();
 // SCRIPTS
 require_once SITE_ROOT . "/src/config/database_connection.php";
 require_once SITE_ROOT . "/src/util/authentication.php";
-require_once SITE_ROOT . "/src/util/arrayset.php";
+require_once SITE_ROOT . "/src/util/set.php";
 require_once SITE_ROOT . "/src/util/util.php";
 require_once SITE_ROOT . "/src/util/upload.php";
 require_once SITE_ROOT . "/src/util/email.php";

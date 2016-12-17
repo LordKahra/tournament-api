@@ -17,6 +17,7 @@ RewriteCond %{REQUEST_FILENAME} !-d
 #
 
 # SITE/user/command
+RewriteRule ^user\/self(\/?)$ src/view/user.php?action=self [NC,L]
 RewriteRule ^user\/update(\/?)$ src/view/user.php?action=update [NC,L]
 # SITE/user/[id]
 RewriteRule ^user\/([0-9]+)(\/?)$ src/view/user.php?action=get&user_id=$1 [NC,L]

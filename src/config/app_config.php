@@ -25,6 +25,9 @@ define("EMAIL_FROM", "lanedev1@gmail.com");
 define("EMAIL_HOST", "smtp.gmail.com");
 define("EMAIL_PORT", "465");
 
+// UPLOAD
+define("BUCKET", getenv("S3_BUCKET_NAME"));
+
 // Debugging Switch.
 define("DEBUG_MODE", true);
 

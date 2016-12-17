@@ -6,7 +6,7 @@ use kahra\src\exception\SQLInsertException;
 use kahra\src\file\WERDocument;
 use kahra\src\util\Debug;
 use kahra\src\util\Str;
-use kahra\src\util\ArraySet;
+use kahra\src\util\Set;
 
 use kahra\src\database\User;
 use kahra\src\database\Store;
@@ -125,7 +125,7 @@ class Tournament extends Object {
             //var_dump($rounds);
 
             // Set the tournament id for the rounds.
-            ArraySet::setAll("tournament_id", $tournament_id, $rounds);
+            Set::setAll("tournament_id", $tournament_id, $rounds);
 
             //var_dump($rounds);
 

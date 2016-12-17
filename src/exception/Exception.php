@@ -24,3 +24,11 @@ class UploadFailureException extends Exception {}
 class InvalidInputException extends Exception {}
 class InvalidEmailException extends InvalidInputException {}
 class InvalidPasswordException extends InvalidInputException {}
+
+class AuthenticationFailureException extends InvalidInputException {
+    function __construct($message) {
+        parent::__construct($message);
+        // TODO: Should we setLoggedIn(false)?
+        //setLoggedIn(false);
+    }
+}

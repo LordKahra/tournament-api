@@ -7,6 +7,7 @@ require_once (getenv("SITE_ROOT_API_TOURNAMENT") . '/src/config/app_config.php')
 use kahra\src\database\Object;
 use kahra\src\database\User;
 
+use kahra\src\exception\AuthenticationFailureException;
 use kahra\src\view\View;
 
 class UserView extends View {
@@ -33,6 +34,22 @@ class UserView extends View {
                     ? View::formatSuccessResponse("Fetched users.", $users)
                     : static::formatFailureResponse(-1, "No users were found."));
                 return true;
+            case "self":
+                if (!isAuthenticated()) {
+                    echo APIResponse::getUnauthorizedResponse("You must be logged in to see your profile.");
+                    return true;
+                }
+
+                try {
+                    $users = User::getById(getLoggedInUserId());
+                    echo ($users
+                        ? View::formatSuccessResponse("Fetched logged in user.", $users)
+                        : static::formatFailureResponse(-1, "No user was found."));
+                    return true;
+                } catch (AuthenticationFailureException $e) {
+                    echo APIResponse::getUnauthorizedResponse();
+                    exit();
+                }
         }
         return false;
     }

@@ -27,8 +27,17 @@ class StoreView extends View {
                 $vanity_url = (isset($_POST["vanity_url"]) ? $_POST["vanity_url"] : false);
                 $site = (isset($_POST["site"]) ? $_POST["site"] : false);
 
-                if (!$name) echo APIResponse::getMissingRequestDataResponse("You must submit a name for your store.");
+                if (!$name) {
+                    echo APIResponse::getMissingRequestDataResponse("You must submit a name for your store.");
+                    return true;
+                }
 
+                $store = Store::create(getLoggedInUserId(), $name, $vanity_url, $site);
+                if ($store) {
+                    echo View::formatSuccessResponse("Successfully created store.", $store);
+                } else {
+                    echo View::formatFailureResponse(-1, "Store creation failure. Better errors TODO.");
+                }
                 return true;
             case "update":
                 if (!isAuthenticated()) {
