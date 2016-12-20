@@ -14,8 +14,9 @@ class User extends Object {
     const TABLE_NAME        = "users";
     const NAME_SINGULAR     = "user";
     const ALIAS             = "user";
-    const FIELDS_SELECT     = "id,dci,email,password,is_subscribed";
+    const FIELDS_SELECT     = "id,dci,email,password,is_subscribed,name";
     const FIELDS_INSERT     = "email,password,dci";
+    const FIELDS_UPDATE     = "dci,email,name";
     const FIELDS_PRIVATE    = "password";
 
     const STATUS_VALID = 1;

@@ -7,6 +7,7 @@ use kahra\src\database\Upload;
 use kahra\src\database\User;
 use kahra\src\exception\SQLInsertException;
 use kahra\src\file\WERParser;
+use kahra\src\util\Set;
 use kahra\src\util\Validation;
 
 use kahra\src\view\APIResponse;
@@ -14,11 +15,11 @@ use kahra\src\view\APIResponse;
 $tournament = (array_key_exists("upload_data", $_POST)) ? $_POST["upload_data"] : false;
 
 // Get type specific information.
-$tournament_id = ($tournament && isset($_POST["tournament_id"]) && !empty($_POST["tournament_id"])) ? $_POST["tournament_id"] : false;
-$extension = ($tournament && !empty($_POST["extension"])) ? $_POST["extension"] : false;
+$tournament_id = Set::get("tournament_id", $_POST);
+$extension = Set::get("extension", $_POST);
 
 if (!Validation::validateWERDocument($tournament, $extension)) {
-    echo APIResponse::getFailure(-1, "Upload is not a valid WERDocument.");
+    echo APIResponse::getFailure(-1, "Upload is not a valid WERDocument. $extension");
     exit();
 }
 
@@ -47,6 +48,7 @@ if (!Validation::validateUploadDirectory($fileDir)) {
 
 try {
     $s3 = \Aws\S3\S3Client::factory();
+    // TODO: HERE
     $upload = $s3->upload(
         BUCKET,
         TOURNAMENT_DIRECTORY . $uploadId . ".wer",
@@ -56,18 +58,31 @@ try {
 
     $uploadUrl = $upload->get('ObjectURL');
 
-
     // Success.
     // Update the uploaded tournament.
     WERParser::updateTournament($uploadId, $tournament_id, $tournament);
 
     echo APIResponse::getSuccess("Upload successful.", $tournament_id);
     exit();
-} catch (\Aws\CloudFront\Exception\Exception $e) {
-    echo APIResponse::getFailure(-1, "There was a server error completing your upload. If the issue persists, please contact support.");
-    exit();
 } catch (SQLInsertException $e) {
-    echo APIResponse::getFailure(-1, "There was an error parsing the uploaded tournament: " . $e->getMessage() . " Query: " . $e->getQuery());
+    echo APIResponse::getFailure(-1,
+        "There was an error parsing the uploaded tournament: " . $e->getMessage() . " Query: " . $e->getQuery());
+    exit();
+} catch (Guzzle\Service\Exception\ValidationException $e) {
+    echo APIResponse::getFailure(-1,
+        "There was an error with the server configuration. If the issue persists, please contact support. " . $e->getMessage());
+    exit();
+} catch (Aws\Common\Exception\InstanceProfileCredentialsException $e) {
+    echo APIResponse::getFailure(-1,
+        "There was an error with the server configuration. If the issue persists, please contact support. " . $e->getMessage());
+    exit();
+} catch (Aws\CloudFront\Exception\Exception $e) {
+    echo APIResponse::getFailure(-1,
+        "There was a server error completing your upload. If the issue persists, please contact support.");
+    exit();
+} catch (Exception $e) {
+    echo APIResponse::getFailure(-1,
+        "There was a server error completing your upload. If the issue persists, please contact support. " . get_class($e));
     exit();
 }
 

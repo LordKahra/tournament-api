@@ -11,11 +11,16 @@ use kahra\src\database\Bye;
 use kahra\src\database\Match;
 use kahra\src\database\Seat;
 
+use kahra\src\util\Set;
 use kahra\src\view\View;
 use kahra\src\view\APIResponse;
 
 class TournamentView extends View {
-    static function show($tournaments=false) {
+    static function show($objects) {
+        // TODO: Is this needed?
+    }
+
+    private static function parse($tournaments) : array {
         if ($tournaments) {
             $tournament_ids = array();
 
@@ -84,21 +89,137 @@ class TournamentView extends View {
                 }
             }
 
+            return $tournaments;
+
             //echo "<pre>" . View::formatSuccessResponse("Fetched tournaments.", $tournaments) . "</pre>";
-            echo APIResponse::getSuccess("Fetched tournaments.", $tournaments);
+            //echo APIResponse::getSuccess("Fetched tournaments.", $tournaments);
         } else {
-            echo APIResponse::getFailure(-1, "No tournaments found.");
+
+            return array();
+            //echo APIResponse::getFailure(-1, "No tournaments found.");
         }
+    }
+
+    private static function handleGetAction($action) : bool {
+        $store_id = Set::get("store_id", $_GET);
+        $store_vanity_url = Set::get("store_vanity_url", $_GET);
+        $id = Set::get("tournament_id", $_GET);
+        $vanity_url = Set::get("tournament_vanity_url", $_GET);
+        $query = "";
+
+        $tournaments = false;
+        switch ($action) {
+            case "mine":
+                if (!isAuthenticated()) {
+                    echo APIResponse::getUnauthorizedResponse("You must be logged in to see your stores.");
+                    return true;
+                }
+                $tournaments = Tournament::getByUserId(getLoggedInUserId());
+                $tournaments = static::parse($tournaments);
+
+                if (!$tournaments) echo APIResponse::getEmptyDataResponse("User " . getLoggedInUserId() . " has no tournaments.");
+                else echo APIResponse::getSuccess("You have " . count($tournaments) . " tournaments.", $tournaments);
+                return true;
+            case "get_by_store":
+                if (!$store_id && !$store_vanity_url) {
+                    return false;
+                }
+
+                $query = "tournament.store_id = ";
+
+                if ($store_id) $query .= "'$store_id'";
+                else $query .= "(SELECT store.id FROM stores store WHERE store.vanity_url = '$store_vanity_url')";
+
+                if ($id) $query .= " AND tournament.id = '$id'";
+                elseif ($vanity_url) $query .= " AND tournament.vanity_url = '$vanity_url'";
+
+                $tournaments = Tournament::get($query);
+
+                /*if ($store_id) {
+                    $query = "tournament.store_id = '$store_id'";
+                    if ($id) {
+                        $query .= " AND tournament.id = '$id'";
+                        //$tournaments = Tournament::get("tournament.store_id = '$store_id' AND tournament.id = '$id'");
+                    } elseif ($vanity_url) {
+                        $query .= " AND tournament.vanity_url = '$vanity_url'";
+                        //$tournaments = Tournament::get("tournament.store_id = '$store_id' AND tournament.vanity_url = '$vanity_url'");
+                    } else {
+                        //$tournaments = Tournament::getByStoreId($store_id);
+                    }
+                    $tournaments = Tournament::get($query);
+                } elseif ($store_vanity_url) {
+                    $query = "tournament.store_id = (SELECT store.id FROM stores WHERE store.vanity_url = '$store_vanity_url')";
+                    if ($id) {
+                        $query .= " AND tournament.id = '$id'";
+                        //$tournaments = Tournament::get("tournament.id = '$id' AND ");
+                    } elseif ($vanity_url) {
+                        $query .= " AND tournament.vanity_url = '$vanity_url'";
+                        /*$tournaments = Tournament::get("tournament.vanity_url = '$vanity_url' AND tournament.store_id = (
+                            SELECT store.id FROM stores WHERE store.vanity_url = '$store_vanity_url'
+                        )");
+                    } else {
+                        /*$tournaments = Tournament::get("tournament.store_id = (
+                            SELECT store.id FROM stores WHERE store.vanity_url = '$store_vanity_url'
+                        )");
+                    }
+                    $tournaments = Tournament::get($query);
+                } else {
+                    // Nope. You have to provide a store.
+                }*/
+
+                break;
+            case "get":
+                // Get submitted data.
+                $id = Set::get("tournament_id", $_GET);
+                $store_id = Set::get("store_id", $_GET);
+                $vanity_url = Set::get("tournament_vanity_url", $_GET);
+
+                if ($id) $tournaments = Tournament::getById($id);
+                    elseif($store_id && !$vanity_url) {
+
+                    }
+                elseif ($store_id || $vanity_url) {
+                    $tournaments = Tournament::get("store_id = '$store_id' AND vanity_url = '$vanity_url'");
+                }
+                else $tournaments = Tournament::get();
+
+                break;
+            case "search":
+                $query = Set::get("tournament_query", $_GET);
+
+                if ($query) $tournaments = Tournament::get("");
+                break;
+        }
+
+        $tournaments = static::parse($tournaments);
+        if (!$tournaments) echo APIResponse::getEmptyDataResponse("No tournaments found. Query: $query");
+        else echo APIResponse::getSuccess("There are " . count($tournaments) . " tournaments.", $tournaments);
+        return true;
     }
 
     static function handleAction($action) : bool {
         switch ($action) {
+            case "get_by_store":
+            case "mine":
+                return static::handleGetAction($action);
+                /*if (!isAuthenticated()) {
+                    echo APIResponse::getUnauthorizedResponse("You must be logged in to see your stores.");
+                    return true;
+                }
+                $tournaments = Tournament::getByUserId(getLoggedInUserId());
+                $tournaments = static::parse($tournaments);
+
+                if (!$tournaments) echo APIResponse::getEmptyDataResponse("User " . getLoggedInUserId() . " has no tournaments.");
+                else echo APIResponse::getSuccess("You have " . count($tournaments) . " tournaments.", $tournaments);
+                return true;*/
             case "get":
                 $tournaments = false;
                 if (array_key_exists("tournament_id", $_GET)) $tournaments = Tournament::getById($_GET["tournament_id"]);
                 //elseif (array_key_exists("tournament_name", $_GET)) $tournaments = Tournament::getByField("name", $_GET["tournament_name"]);
                 else $tournaments = Tournament::get();
-                static::show($tournaments);
+                $tournaments = static::parse($tournaments);
+                if (!$tournaments) echo APIResponse::getEmptyDataResponse("No tournaments found.");
+                else echo APIResponse::getSuccess("There are " . count($tournaments) . " tournaments.", $tournaments);
                 return true;
         }
         return false;
@@ -111,7 +232,7 @@ class TournamentView extends View {
     return (View::IS_ALIASED ? "tournament_" : "");
 }*/
 
-function getTournaments() {
+/*function getTournaments() {
     $tournaments = false;
 
     // Get the appropriate information based on the request.
@@ -126,10 +247,10 @@ function getTournaments() {
         //$tournaments = View::parseResult(Tournament::get());
         $tournaments = Tournament::get();
     }
-    return $tournaments;
-}
+    return TournamentView::parse($tournaments);
+}*/
 
-function show($tournaments=false) {
+/*function show($tournaments=false) {
     if ($tournaments) {
         $tournament_ids = array();
 
@@ -183,7 +304,7 @@ function show($tournaments=false) {
     } else {
         echo APIResponse::getFailure(-1, "No tournaments found.");
     }
-}
+}*/
 
 /*$tournaments = false;
 $errors = [];
@@ -252,7 +373,9 @@ if ($tournaments) {
     ?>No tournaments found.<?php
 }*/
 
-TournamentView::show(getTournaments());
+//TournamentView::show(getTournaments());
+TournamentView::handleRequest();
+exit();
 
 //print_r($_GET);
 

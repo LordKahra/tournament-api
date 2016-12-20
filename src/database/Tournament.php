@@ -17,7 +17,7 @@ class Tournament extends Object {
     const NAME_SINGULAR     = "tournament";
     const TAG_NAME          = "event";
     const ALIAS             = "tournament";
-    const FIELDS_SELECT     = "id,store_id,name,last_updated,type_id";
+    const FIELDS_SELECT     = "id,store_id,name,last_updated,type_id,vanity_url,user_id";
     const FIELDS_INSERT     = "name";
     const FIELD_PARENT_ID   = "store_id";
 
@@ -41,6 +41,8 @@ class Tournament extends Object {
         $aliased_store_fields = empty($aliased_store_fields) ? "" : $store_alias . "." . $aliased_store_fields;
         */
 
+        return array();
+
         return array(
             "user" => array(
                 "fields" => $user_fields,
@@ -50,6 +52,7 @@ class Tournament extends Object {
                     "SELECT " . $aliased_fields . " " .
                     "FROM " . $user_table . " " . $user_alias . " " .
                     "WHERE " . $user_alias . ".id = " .
+                        //static::ALIAS . ".user_id"
                         "(SELECT user_id FROM stores store WHERE store.id = " . self::getAlias() . ".store_id)" .
                 ") as " . $user_alias . "_id"
             )
@@ -81,7 +84,11 @@ class Tournament extends Object {
     // CUSTOM QUERIES
 
     static function getByUserId($user_id) {
-        return static::get("user_id = " . $user_id);
+        return static::get("tournament.user_id = " . $user_id);
+    }
+
+    static function getByStoreId($store_id) {
+        return static::get("tournament.store_id = " . $store_id);
     }
 
     /**

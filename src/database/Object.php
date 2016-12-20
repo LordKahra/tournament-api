@@ -7,18 +7,19 @@ use kahra\src\exception\SQLInsertException;
 use kahra\src\util\Debug;
 
 abstract class Object {
-    const FIELD_ID          = "id";
-    const FIELD_PARENT_ID   = false;
-    const TABLE_NAME        = false;
-    const NAME_SINGULAR     = false;
-    const TAG_NAME          = false;
-    const ALIAS             = false;
-    const FIELDS_SELECT     = false;
-    const FIELDS_INSERT     = false;
-    const FIELDS_UPSERT     = false;
-    const FIELDS_PRIVATE    = false;
-    const DEFAULT_SORT      = false;
-    const IS_PREFIXED       = false;
+    const FIELD_ID              = "id";
+    const FIELD_PARENT_ID       = false;
+    const TABLE_NAME            = false;
+    const NAME_SINGULAR         = false;
+    const TAG_NAME              = false;
+    const ALIAS                 = false;
+    const FIELDS_SELECT         = false;
+    const FIELDS_INSERT         = false;
+    const FIELDS_UPSERT         = false;
+    const FIELDS_UPDATE         = false;
+    const FIELDS_PRIVATE        = false;
+    const DEFAULT_SORT          = false;
+    const IS_PREFIXED           = false;
 
     static function getPrefix() {
         return (static::IS_PREFIXED ? static::ALIAS . "_" : "");
@@ -249,6 +250,7 @@ abstract class Object {
             return $mappedObjects;
         }
         return false;
+        // TODO: return array();
         //return $results;
     }
 

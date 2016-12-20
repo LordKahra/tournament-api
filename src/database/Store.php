@@ -9,8 +9,9 @@ class Store extends Object {
     const TABLE_NAME        = "stores";
     const NAME_SINGULAR     = "store";
     const ALIAS             = "store";
-    const FIELDS_SELECT     = "id,user_id,name,vanity_url,site,location_id";
+    const FIELDS_SELECT     = "id,user_id,name,vanity_url,site,location_id,phone";
     const FIELDS_INSERT     = "user_id,name";
+    const FIELDS_UPDATE     = "name,vanity_url,site,phone";
 
     /*static function getChildren() {
         return [ static::getGenericChildJoinClause(Tournament::getTableName(), Tournament::getAlias(), Tournament::getParentIDField()) => new Tournament() ];

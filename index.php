@@ -75,6 +75,7 @@ use kahra\src\database\Tournament;
         <p>store_id <input name="store_id" type="number" /></p>
         <p>Name <input name="name" type="text" /></p>
         <p>Vanity URL <input name="vanity_url" type="text" /></p>
+        <input type="hidden" name="extension" value=".wer" />
         <input type="submit" value="Update" name="submit" />
     </form>
 

@@ -4,7 +4,7 @@ namespace kahra\src\util;
 
 use TypeError;
 
-class Set {
+/*class Set {
     /**
      * Sets a key => value pair on every record in an array.
      *
@@ -13,7 +13,7 @@ class Set {
      * @param array $records The records.
      *
      * @throws TypeError if the key is null.
-     */
+     *
     static function setAll(string $key, $value, array &$records) {
         if (!$key) throw new TypeError();
         foreach ($records as &$record) {
@@ -24,13 +24,15 @@ class Set {
     /**
      * @param string $needle
      * @param array $haystack
-     * @return bool
-     */
-    static function get(string $needle, array $haystack) : bool {
+     * @return string
+     *
+    static function get(string $needle, array $haystack) : string {
         return ((
             array_key_exists($needle, $haystack)
             && !empty($haystack[$needle])
             && $haystack[$needle]
-        ) ? $haystack[$needle] : false);
+        ) ? $haystack[$needle] : "");
     }
-}
+
+    // TODO: More functions. getInt, getBool, etc.
+}*/

@@ -19,6 +19,7 @@ class WERDocument extends DOMDocument {
     const TAG_ROUND = 'round';
     const TAG_MATCH = 'match';
 
+    const ATTRIBUTE_EVENT_START_DATE ='startdate';
     const ATTRIBUTE_ROUND_NUMBER ='number';
     const ATTRIBUTE_MATCH_PERSON ='person';
     const ATTRIBUTE_MATCH_OPPONENT ='opponent';
@@ -35,12 +36,14 @@ class WERDocument extends DOMDocument {
     public $byes;
     //public $pods = false;
     public $seats;
+    public $start_date;
 
     // retrieved with file_get_contents
     public function __construct($body) {
         //$dom = new \DOMDocument();
         $this->loadXML($body);
 
+        $this->createDateData();
         $this->createRoundData();
         $this->createByeData();
 
@@ -109,6 +112,15 @@ class WERDocument extends DOMDocument {
         echo "<h2>seats</h2>";
         var_dump($this->seats);
         */
+    }
+
+    private function createDateData() {
+        Debug::log("WERDoc.createDateData()", "Entered.");
+
+        $start_date = $this->documentElement->getAttribute(static::ATTRIBUTE_EVENT_START_DATE);
+        $this->start_date = $start_date;
+
+        Debug::log("WERDoc.createDateData()", "Done.");
     }
 
     private function createRoundData() {

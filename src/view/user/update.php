@@ -6,6 +6,7 @@ require_once (getenv("SITE_ROOT_API_TOURNAMENT") . '/src/config/app_config.php')
 
 use kahra\src\database\User;
 use kahra\src\exception\AuthenticationFailureException;
+use kahra\src\util\Set;
 use kahra\src\view\APIResponse;
 
 if (!isAuthenticated()) {
@@ -14,6 +15,7 @@ if (!isAuthenticated()) {
 }
 
 // Find the user.
+$user_id = false;
 try {
     $user_id = getLoggedInUserId();
 } catch (AuthenticationFailureException $e) {
@@ -21,17 +23,23 @@ try {
     exit();
 }
 
-// TODO: Add more options for user updates.
-// Get post data into variables.
-$dci = (isset($_POST["dci"]) ? $_POST["dci"] : false);
-$email = (isset($_POST["email"]) ? $_POST["email"] : false);
-
 // Create an array for the data.
 $data = array();
 
-// Add data to the array.
-if ($dci)          $data["dci"] = $dci;
-if ($email)          $data["email"] = $email;
+// Fetch all allowed submitted data.
+foreach (explode(",", User::FIELDS_UPDATE) as $field) {
+    $value = Set::get($field, $_POST);
+    if ($value) $data[$field] = $value;
+}
+
+/*echo APIResponse::get(false, -1, "Debugging.", $data);
+exit();*/
+
+if (!$data) {
+    // There's no data. Exit.
+    echo APIResponse::getEmptyDataResponse("You must submit data to update.");
+    exit();
+}
 
 // Attempt to update the database.
 $affectedRows = User::update($data, "id = '$user_id'");

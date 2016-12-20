@@ -154,11 +154,15 @@ class WERParser {
 
         // Update the tournament.
         //static::handleWERText($body, $tournament_id);
-        Tournament::generateData(new WERDocument($body), $tournament_id);
+        $document = new WERDocument($body);
+        //return;
+        Tournament::generateData($document, $tournament_id);
 
-        // Set the tournament as last updated now.
+        // Set the tournament as last updated now, and the start date.
         $fields = array(
-            "last_updated" => filemtime($filename)
+            //"last_updated" => filemtime($filename),
+            "last_updated" => time(),
+            "start_date" => $document->start_date
         );
         Tournament::update($fields, "id = " . $tournament_id);
 

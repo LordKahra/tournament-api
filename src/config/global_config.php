@@ -28,7 +28,7 @@ session_start();
 // SCRIPTS
 require_once SITE_ROOT . "/src/config/database_connection.php";
 require_once SITE_ROOT . "/src/util/authentication.php";
-require_once SITE_ROOT . "/src/util/set.php";
+//require_once SITE_ROOT . "/src/util/set.php";
 require_once SITE_ROOT . "/src/util/util.php";
 require_once SITE_ROOT . "/src/util/upload.php";
 require_once SITE_ROOT . "/src/util/email.php";
@@ -54,7 +54,7 @@ require_once SITE_ROOT . "/src/file/WERDocument.php";
 
 // VIEW REQUIREMENTS
 require_once SITE_ROOT . "/src/view/APIResponse.php";
-require_once SITE_ROOT . "/src/view/View.php";
+require_once SITE_ROOT . "/src/view/object/View.php";
 
 // SYSTEM FUNCTIONS
 
