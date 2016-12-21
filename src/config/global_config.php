@@ -38,6 +38,7 @@ require_once SITE_ROOT . "/src/util/validation.php";
 // MODEL REQUIREMENTS
 require_once SITE_ROOT . "/src/exception/Exception.php";
 require_once SITE_ROOT . "/src/database/Object.php";
+require_once SITE_ROOT . "/src/database/Location.php";
 require_once SITE_ROOT . "/src/database/Token.php";
 require_once SITE_ROOT . "/src/database/Player.php";
 require_once SITE_ROOT . "/src/database/Tournament.php";

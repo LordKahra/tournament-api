@@ -27,7 +27,7 @@ class Tournament extends Object {
         );
     }
 
-    static function getSubqueries() {
+    static function getSubqueries() : array {
         $user_table = User::getTableName();
         $user_alias = User::getAlias();
         $user_fields = array("id");

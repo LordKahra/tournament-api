@@ -3,6 +3,7 @@
 namespace kahra\src\database;
 
 use kahra\src\database\Object;
+use kahra\src\util\Str;
 
 class Store extends Object {
     const FIELD_PARENT_ID   = "user_id";
@@ -36,6 +37,30 @@ class Store extends Object {
             )
         );
     }*/
+
+    static function getSubqueries() : array {
+        $self_alias = static::ALIAS;
+        $table = Location::TABLE_NAME;
+        $alias = Location::ALIAS;
+        $aliased_fields = implode(",", Str::getReferences(
+            $alias,
+            array("address_1","address_2","city","state","zip","country","latitude","longitude","type")));
+
+
+        return array(
+            array(
+                "fields" => array("address_1","address_2","city","state","zip","country","latitude","longitude","type"),
+                "table" => $table,
+                "alias" => $alias,
+                "query" =>
+                "(" .
+                    "SELECT $aliased_fields " .
+                    "FROM $table $alias " .
+                    "WHERE $alias.id = $self_alias.location_id" .
+                ")"
+            )
+        );
+    }
 
     static function getByUserId($user_id) {
         return self::getByField("user_id", $user_id);

@@ -145,7 +145,16 @@ abstract class Object {
         return array();
     }
 
-    static function getSubqueries() {
+    /**
+     * Generates an array of arrays, each containing the following fields:
+     * [fields]     The fields to retrieve.
+     * [table]      The table name.
+     * [alias]      The table alias.
+     * [subquery]   The select query, enclosed in parenthesis ().
+     *
+     * @return array
+     */
+    static function getSubqueries() : array {
         /*
         return array(
             alias => array(
@@ -224,7 +233,7 @@ abstract class Object {
             ($order     ? " \r\nORDER BY "      . $order                : "");
 
         //Debug::log("Object.get", $query);
-        //echo "<br/><br/><br/><br/><br/><br/>" . $query;
+        echo "<br/><br/><br/><br/><br/><br/>" . $query;
         global $mysqli;
         $result = $mysqli->query($query);
 

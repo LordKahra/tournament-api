@@ -62,7 +62,7 @@ try {
     // Update the uploaded tournament.
     WERParser::updateTournament($uploadId, $tournament_id, $tournament);
 
-    echo APIResponse::getSuccess("Upload successful.", $tournament_id);
+    echo APIResponse::getSuccess("Upload successful.", false, $tournament_id);
     exit();
 } catch (SQLInsertException $e) {
     echo APIResponse::getFailure(-1,
