@@ -38,7 +38,7 @@ class Store extends Object {
         );
     }*/
 
-    static function getSubqueries() : array {
+    /*static function getSubqueries() : array {
         $self_alias = static::ALIAS;
         $table = Location::TABLE_NAME;
         $alias = Location::ALIAS;
@@ -60,6 +60,21 @@ class Store extends Object {
                 ")"
             )
         );
+    }*/
+
+    static function getMonogamousJoins() : array {
+        $location_alias = Location::ALIAS;
+        $location_table = Location::TABLE_NAME;
+        $location_fields = explode(",", Location::FIELDS_SELECT);
+        $parent_alias = static::ALIAS;
+
+        return array($location_alias => array(
+            "fields" => $location_fields,
+            "table" => $location_table,
+            "alias" => $location_alias,
+            "select" => Str::createSelectClause($location_alias, $location_fields),
+            "query" => "LEFT JOIN $location_table $location_alias ON $parent_alias.location_id = $location_alias.id"
+        ));
     }
 
     static function getByUserId($user_id) {

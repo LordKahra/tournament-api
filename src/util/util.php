@@ -70,6 +70,20 @@ class Set {
             && $haystack[$needle]
         ) ? $haystack[$needle] : "");
     }
+    // TODO: Switch to object return type
+
+    /**
+     * @param string $needle
+     * @param array $haystack
+     * @return string
+     */
+    static function getObject(string $needle, array $haystack) {
+        return ((
+            array_key_exists($needle, $haystack)
+            && !empty($haystack[$needle])
+            && $haystack[$needle]
+        ) ? $haystack[$needle] : "");
+    }
     // TODO: More functions. getInt, getBool, etc.
 }
 

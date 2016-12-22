@@ -21,6 +21,9 @@ class SQLUpdateException extends SQLException {}
 class InsertFailureException extends Exception {}
 class UploadFailureException extends Exception {}
 
+class EmptyInputException extends Exception {}
+class MissingInputException extends Exception {}
+
 class InvalidInputException extends Exception {}
 class InvalidEmailException extends InvalidInputException {}
 class InvalidPasswordException extends InvalidInputException {}

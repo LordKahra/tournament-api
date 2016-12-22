@@ -3,6 +3,7 @@
 namespace kahra\src\database;
 
 use DOMDocument;
+use kahra\src\exception\MissingInputException;
 use kahra\src\exception\SQLInsertException;
 use kahra\src\util\Debug;
 
@@ -49,16 +50,16 @@ abstract class Object {
         return static::TAG_NAME;
     }
 
-    static function getQueryFields() {
-        return explode(",",static::FIELDS_SELECT);
+    static function getQueryFields() : array {
+        return (static::FIELDS_SELECT ? explode(",",static::FIELDS_SELECT) : array());
     }
 
-    static function getUpsertFields() {
-        return explode(",",static::FIELDS_UPSERT);
+    static function getUpsertFields() : array {
+        return (static::FIELDS_UPSERT ? explode(",",static::FIELDS_UPSERT) : array());
     }
 
-    static function getRequiredFields() {
-        return explode(",",static::FIELDS_INSERT);
+    static function getRequiredFields() : array {
+        return static::FIELDS_INSERT ? explode(",",static::FIELDS_INSERT) : array();
     }
 
     static function getSelectClause($includeChildren=true) {
@@ -68,6 +69,8 @@ abstract class Object {
         foreach(static::getQueryFields() as $field) {
             $clause .= (empty($clause) ? "" : ",") . "\n`" . static::getAlias() . "`." . $field . " AS " . static::getSingularName() . "_" . $field;
         }
+
+        //echo "\r\n\r\ngetSelectClause(): $clause";
 
         // If any, add child fields.
         if ($includeChildren) foreach (static::getChildren() as $child) {
@@ -126,7 +129,26 @@ abstract class Object {
         return array();
     }
 
-    static function getMonogamousJoins() {
+
+    /**
+     * Returns an array with information about monogamous joins.
+     *
+     * ***
+     * ALIAS => array (
+     *     [fields] array("field_a","field_b")
+     *     [table] Object::getTableName()
+     *     [alias] Object::getAlias()
+     *     [query] Query string.
+     * )
+     * ***
+     *
+     *     * "LEFT JOIN children child ON parent.child_id = child.id"
+     *     * "LEFT JOIN children child ON parent.id = child.parent_id"
+     *
+     *
+     * @return array
+     */
+    static function getMonogamousJoins() : array {
         /*
         return array(
             alias => array(
@@ -233,7 +255,8 @@ abstract class Object {
             ($order     ? " \r\nORDER BY "      . $order                : "");
 
         //Debug::log("Object.get", $query);
-        echo "<br/><br/><br/><br/><br/><br/>" . $query;
+        //echo "\r\n\r\nSELECT: $select";
+        //echo "<br/><br/><br/><br/><br/><br/>\r\n\r\nQUERY: $query";
         global $mysqli;
         $result = $mysqli->query($query);
 
@@ -286,15 +309,16 @@ abstract class Object {
     /**
      * @param $fields
      * @param bool $raw
-     * @return bool|mixed
+     * @return int
+     * @throws MissingInputException
      * @throws SQLInsertException
      */
-    static function insert($fields, $raw=false) {
+    static function insert(array $fields, $raw=false) : int {
         $requiredFields = static::getRequiredFields();
 
         // Check for required fields.
         foreach ($requiredFields as $required) {
-            if (!array_key_exists($required, $fields)) return false;
+            if (!array_key_exists($required, $fields)) throw new MissingInputException("You must submit all required fields.");
         }
 
         // Generate key/value strings.
@@ -312,7 +336,8 @@ abstract class Object {
             "VALUES " .
                 "(" . $valueString . ")";
 
-        //echo $query;
+        //echo "\r\nINSERT Query: " . $query;
+        //throw new SQLInsertException("Debugging.", $query);
         global $mysqli;
         $results = $mysqli->query($query);
         //var_dump($fields);
@@ -321,6 +346,7 @@ abstract class Object {
         if (!$results) throw new SQLInsertException("Failed to insert " . static::ALIAS . " with error: " . $mysqli->error, $query);
         return $mysqli->insert_id;
         // TODO: FULL SWAP OVER TO STATUS => true/false
+        // TODO: NO DINGUS, OVER TO INSERT_ID OR THROW
     }
 
     static function bulkInsert($objects) {
@@ -362,7 +388,7 @@ abstract class Object {
             " SET " . $fieldString .
             " WHERE " . $where;
 
-        //echo $query;
+        //echo "\r\nUPDATE Query: " . $query;
         global $mysqli;
         $results = $mysqli->query($query);
         //return $results;

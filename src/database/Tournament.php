@@ -59,7 +59,7 @@ class Tournament extends Object {
         );
     }
 
-    static function getMonogamousJoins() {
+    static function getMonogamousJoins() : array {
         $store_table = Store::getTableName();
         $store_alias = Store::getAlias();
         $store_fields = array("id", "name");
