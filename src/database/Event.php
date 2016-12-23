@@ -9,8 +9,9 @@ class Event extends Object {
     const TABLE_NAME        = "events";
     const NAME_SINGULAR     = "event";
     const ALIAS             = "event";
-    const FIELDS_SELECT     = "id,store_id,name,vanity_url";
-    const FIELDS_INSERT     = "store_id,name";
+    const FIELDS_SELECT     = "id,store_id,name,vanity_url,user_id";
+    const FIELDS_INSERT     = "store_id,name,user_id";
+    const FIELDS_UPDATE     = "store_id,name,vanity_url";
 
     static function getByStoreId($store_id) {
         return self::getByField("store_id", $store_id);

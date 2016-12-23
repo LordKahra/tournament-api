@@ -48,6 +48,7 @@ require_once SITE_ROOT . "/src/database/Bye.php";
 require_once SITE_ROOT . "/src/database/Seat.php";
 require_once SITE_ROOT . "/src/database/Pairing.php";
 require_once SITE_ROOT . "/src/database/User.php";
+require_once SITE_ROOT . "/src/database/Event.php";
 require_once SITE_ROOT . "/src/database/Store.php";
 require_once SITE_ROOT . "/src/database/Upload.php";
 

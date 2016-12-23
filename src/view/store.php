@@ -4,6 +4,8 @@ namespace kahra\src\view;
 
 require_once (getenv("SITE_ROOT_API_TOURNAMENT") . '/src/config/app_config.php');
 
+use kahra\src\database\Event;
+use kahra\src\database\Object;
 use kahra\src\database\Store;
 use kahra\src\database\User;
 use kahra\src\view\APIResponse;
@@ -12,6 +14,32 @@ use kahra\src\view\View;
 class StoreView extends View {
     static function show($objects=array()) {
         // TODO: Implement show() method.
+    }
+
+    static function parse($stores) : array {
+        if ($stores) {
+            $store_ids = array();
+
+
+            foreach ($stores as $tournament) {
+                $store_ids[] = $tournament[Store::getPrefix() . "id"];
+                $store["events"] = array();
+            }
+
+            $events = Event::getByFields("store_id", $store_ids);
+            //var_dump($events);
+
+            if ($events) {
+                // Put each event with its tournament.
+                foreach ($events as $event) {
+                    $stores[$event[Event::getPrefix() . "store_id"]]["events"][] = $event;
+                }
+            }
+            //var_dump($stores);
+            return $stores;
+        } else {
+            return array();
+        }
     }
 
     static function handleAction($action) : bool {
@@ -82,6 +110,7 @@ class StoreView extends View {
                 }
 
                 $stores = Store::getByUserId(getLoggedInUserId());
+                $stores = static::parse($stores);
 
                 if (!$stores) echo APIResponse::getEmptyDataResponse("User " . getLoggedInUserId() . " has no stores.");
                 else echo APIResponse::getSuccess("You have " . count($stores) . " stores.", $stores);
@@ -99,6 +128,8 @@ class StoreView extends View {
                 } else {
                     $stores = Store::get();
                 }
+
+                $stores = static::parse($stores);
 
                 // TODO: Debugging.
                 //$stores = Store::get();

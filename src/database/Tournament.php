@@ -17,7 +17,7 @@ class Tournament extends Object {
     const NAME_SINGULAR     = "tournament";
     const TAG_NAME          = "event";
     const ALIAS             = "tournament";
-    const FIELDS_SELECT     = "id,store_id,name,last_updated,type_id,vanity_url,user_id";
+    const FIELDS_SELECT     = "id,store_id,name,last_updated,type_id,vanity_url,user_id,event_id";
     const FIELDS_INSERT     = "name";
     const FIELD_PARENT_ID   = "store_id";
 

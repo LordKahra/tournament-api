@@ -28,7 +28,6 @@ class TournamentView extends View {
                 $tournament_ids[] = $tournament[Object::getPrefix() . "id"];
                 $tournament["rounds"] = array();
                 $tournament["players"] = array();
-                $tournament["players"]["debug"] = "not null plz";
             }
 
             $rounds = Round::getByFields("tournament_id", $tournament_ids);
