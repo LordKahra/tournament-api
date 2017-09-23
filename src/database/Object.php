@@ -256,11 +256,12 @@ abstract class Object {
 
         //Debug::log("Object.get", $query);
         //echo "\r\n\r\nSELECT: $select";
-        //echo "<br/><br/><br/><br/><br/><br/>\r\n\r\nQUERY: $query";
+        echo "<br/><br/><br/><br/><br/><br/>\r\n\r\nQUERY: $query";
         global $mysqli;
         $result = $mysqli->query($query);
 
         if ($result) {
+            echo "\r\nResult found.";
             $objects = mysqli_fetch_all($result, MYSQLI_ASSOC);
             /*while ($object = mysqli_fetch_all($result, MYSQLI_ASSOC)) {
                 //$objects[$object[static::getSingularName() . "_" . static::FIELD_ID]] = $object;
@@ -281,6 +282,7 @@ abstract class Object {
             }
             return $mappedObjects;
         }
+        echo "\r\nResult NOT found.";
         return false;
         // TODO: return array();
         //return $results;
